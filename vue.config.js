@@ -4,7 +4,7 @@ require('dotenv').config()
 module.exports = defineConfig({
   transpileDependencies: true,
   publicPath: process.env.NODE_ENV === 'production'
-    ? '/my-tax-calculator/'
+    ? '/Kenya-Tax-Billing-Calculator/'
     : '/',
   // Make sure environment variables are properly passed to the app
   chainWebpack: config => {
