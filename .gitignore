@@ -1,0 +1,75 @@
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Dependencies
+node_modules
+package-lock.json
+yarn.lock
+.pnp.*
+.npm
+
+# Build output
+/dist
+/build
+.output
+.nuxt
+
+# Testing and coverage
+/coverage
+.nyc_output
+*.lcov
+
+# Log files
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment files
+.env
+.env.*
+!.env.example
+.env.local
+.env.*.local
+
+# Firebase
+.firebase/
+firebase-debug.log*
+firebase-debug.*.log*
+.runtimeconfig.json
+*-debug.log
+
+# Service workers
+*.sw.js
+workbox-*.js
+service-worker.js
+serviceWorker.js
+
+# Backup files
+*.bak
+*.backup
+*~
+*.swp
+
+# Local development
+.local
+.cache
+.temp
