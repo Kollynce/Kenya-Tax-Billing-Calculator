@@ -1,35 +1,28 @@
 <template>
-  <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-    <div class="sm:mx-auto sm:w-full sm:max-w-md">
-      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-        {{ isLogin ? 'Sign in to your account' : 'Create a new account' }}
-      </h2>
-      <p class="mt-2 text-center text-sm text-gray-600">
-        {{ isLogin ? "Don't have an account?" : 'Already have an account?' }}
-        <button 
-          @click="toggleMode" 
-          class="font-medium text-kenya-green hover:text-green-700"
-        >
-          {{ isLogin ? 'Sign up' : 'Sign in' }}
-        </button>
-      </p>
-    </div>
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow-lg p-6">
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">{{ isRegistering ? 'Create Account' : 'Sign In' }}</h1>
+        <p class="mt-2 text-gray-600">
+          {{ isRegistering ? 'Create your account to save calculations and manage billing' : 'Sign in to access your tax calculations and billing history' }}
+        </p>
+      </div>
 
-    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-      <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-        <form class="space-y-6" @submit.prevent="handleSubmit">
+      <div class="bg-white shadow rounded-lg p-6 max-w-md mx-auto">
+        <form @submit.prevent="handleSubmit" class="space-y-6">
+          <!-- Email -->
           <div>
             <InputField
               id="email"
               v-model="form.email"
-              label="Email address"
+              label="Email"
               type="email"
               :error="errors.email"
               required
-              autocomplete="email"
             />
           </div>
 
+          <!-- Password -->
           <div>
             <InputField
               id="password"
@@ -38,11 +31,11 @@
               type="password"
               :error="errors.password"
               required
-              autocomplete="current-password"
             />
           </div>
 
-          <div v-if="!isLogin">
+          <!-- Confirm Password (Registration only) -->
+          <div v-if="isRegistering">
             <InputField
               id="confirmPassword"
               v-model="form.confirmPassword"
@@ -53,76 +46,163 @@
             />
           </div>
 
-          <div v-if="authStore.error" class="text-red-600 text-sm">
-            {{ authStore.error }}
+          <!-- Name (Registration only) -->
+          <div v-if="isRegistering">
+            <InputField
+              id="name"
+              v-model="form.name"
+              label="Full Name"
+              type="text"
+              :error="errors.name"
+              required
+            />
           </div>
 
+          <!-- Phone (Registration only) -->
+          <div v-if="isRegistering">
+            <InputField
+              id="phone"
+              v-model="form.phone"
+              label="Phone Number"
+              type="tel"
+              :error="errors.phone"
+              placeholder="+254"
+              required
+            />
+          </div>
+
+          <!-- Submit Button -->
           <div>
             <Button
               type="submit"
               variant="kenya"
               class="w-full"
-              :disabled="authStore.loading"
+              :loading="loading"
+              :disabled="loading"
             >
-              {{ isLogin ? 'Sign in' : 'Sign up' }}
+              {{ isRegistering ? 'Create Account' : 'Sign In' }}
             </Button>
           </div>
+
+          <!-- Error Message -->
+          <div v-if="authError" class="text-center text-red-600 text-sm">
+            {{ authError }}
+          </div>
         </form>
+
+        <!-- Divider -->
+        <div class="mt-6">
+          <div class="relative">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-gray-300"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+              <span class="px-2 bg-white text-gray-500">Or continue with</span>
+            </div>
+          </div>
+
+          <!-- Social Login -->
+          <div class="mt-6">
+            <button
+              @click="signInWithGoogle"
+              class="w-full inline-flex justify-center items-center gap-3 px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            >
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                />
+              </svg>
+              Continue with Google
+            </button>
+          </div>
+        </div>
+
+        <!-- Toggle Register/Login -->
+        <div class="mt-6 text-center text-sm">
+          <p class="text-gray-600">
+            {{ isRegistering ? 'Already have an account?' : 'Need an account?' }}
+            <button
+              type="button"
+              class="ml-1 text-green-600 hover:text-green-500 font-medium"
+              @click="toggleRegister"
+            >
+              {{ isRegistering ? 'Sign in' : 'Create one' }}
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref, reactive } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../store/authStore';
-import InputField from '../components/InputField.vue';
 import Button from '../components/Button.vue';
+import InputField from '../components/InputField.vue';
 
 export default {
-  name: 'AuthPage',
+  name: 'AuthView',
   components: {
-    InputField,
-    Button
+    Button,
+    InputField
   },
   setup() {
     const router = useRouter();
     const authStore = useAuthStore();
-    const isLogin = ref(true);
-    const errors = reactive({});
+    const loading = ref(false);
+    const isRegistering = ref(false);
+    const authError = ref('');
 
-    const form = reactive({
+    const form = ref({
       email: '',
       password: '',
-      confirmPassword: ''
+      confirmPassword: '',
+      name: '',
+      phone: ''
     });
 
+    const errors = ref({});
+
     const validateForm = () => {
-      errors.email = '';
-      errors.password = '';
-      errors.confirmPassword = '';
+      errors.value = {};
       let isValid = true;
 
-      if (!form.email) {
-        errors.email = 'Email is required';
+      if (!form.value.email) {
+        errors.value.email = 'Email is required';
         isValid = false;
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-        errors.email = 'Invalid email format';
-        isValid = false;
-      }
-
-      if (!form.password) {
-        errors.password = 'Password is required';
-        isValid = false;
-      } else if (form.password.length < 6) {
-        errors.password = 'Password must be at least 6 characters';
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
+        errors.value.email = 'Please enter a valid email';
         isValid = false;
       }
 
-      if (!isLogin.value && form.password !== form.confirmPassword) {
-        errors.confirmPassword = 'Passwords do not match';
+      if (!form.value.password) {
+        errors.value.password = 'Password is required';
         isValid = false;
+      } else if (form.value.password.length < 6) {
+        errors.value.password = 'Password must be at least 6 characters';
+        isValid = false;
+      }
+
+      if (isRegistering.value) {
+        if (!form.value.confirmPassword) {
+          errors.value.confirmPassword = 'Please confirm your password';
+          isValid = false;
+        } else if (form.value.password !== form.value.confirmPassword) {
+          errors.value.confirmPassword = 'Passwords do not match';
+          isValid = false;
+        }
+
+        if (!form.value.name) {
+          errors.value.name = 'Name is required';
+          isValid = false;
+        }
+
+        if (form.value.phone && !/^\+?[\d\s-]{10,}$/.test(form.value.phone)) {
+          errors.value.phone = 'Please enter a valid phone number';
+          isValid = false;
+        }
       }
 
       return isValid;
@@ -131,35 +211,67 @@ export default {
     const handleSubmit = async () => {
       if (!validateForm()) return;
 
+      loading.value = true;
+      authError.value = '';
+
       try {
-        if (isLogin.value) {
-          await authStore.login(form.email, form.password);
+        if (isRegistering.value) {
+          await authStore.register(form.value);
         } else {
-          await authStore.register(form.email, form.password);
+          await authStore.login(form.value);
         }
         router.push('/');
       } catch (error) {
-        // Error is handled by the store and displayed in the template
-        console.error('Authentication error:', error);
+        authError.value = error.message;
+      } finally {
+        loading.value = false;
       }
     };
 
-    const toggleMode = () => {
-      isLogin.value = !isLogin.value;
-      errors.email = '';
-      errors.password = '';
-      errors.confirmPassword = '';
-      authStore.clearError();
+    const signInWithGoogle = async () => {
+      loading.value = true;
+      authError.value = '';
+
+      try {
+        await authStore.signInWithGoogle();
+        router.push('/');
+      } catch (error) {
+        authError.value = error.message;
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    const toggleAuthMode = () => {
+      isRegistering.value = !isRegistering.value;
+      errors.value = {};
+      authError.value = '';
     };
 
     return {
       form,
       errors,
-      isLogin,
-      authStore,
+      loading,
+      isRegistering,
+      authError,
       handleSubmit,
-      toggleMode
+      signInWithGoogle,
+      toggleAuthMode
     };
   }
 };
 </script>
+
+<style scoped>
+.text-primary {
+  color: #16A34A;  /* text-green-600 equivalent */
+}
+
+.bg-primary {
+  background-color: #16A34A;  /* bg-green-600 equivalent */
+}
+
+.bg-primary-dark {
+  background-color: #15803D;  /* bg-green-700 equivalent */
+}
+</style>

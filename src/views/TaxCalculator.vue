@@ -1,215 +1,280 @@
 <template>
   <div class="max-w-7xl mx-auto px-4 py-8">
-    <!-- Example Section -->
-    <TaxCalculatorExample v-if="!hasStartedCalculation" class="mb-8" />
+    <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow-lg p-6">
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Tax Calculator</h1>
+        <p class="mt-2 text-gray-600">Calculate your income tax, NSSF, SHIF, and housing levy contributions</p>
+      </div>
 
-    <div class="bg-white rounded-lg shadow-lg p-6">
-      <div class="px-4 py-6 sm:px-0">
-        <!-- Page Header -->
-        <div class="mb-8">
-          <h1 class="text-3xl font-bold text-gray-900">Kenya Tax Calculator</h1>
-          <p class="mt-2 text-gray-600">Calculate your income tax, NSSF, and SHIF contributions</p>
-        </div>
-
+      <div class="bg-white rounded-lg shadow p-6">
         <!-- Calculator Form -->
-        <div class="bg-white shadow rounded-lg p-6 mb-8">
-          <form @submit.prevent="calculateTax" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <!-- Income Input -->
-              <InputField
-                id="income"
-                v-model="income"
-                label="Annual Income (KES)"
-                type="number"
-                :error="errors.income"
-                required
-              />
-
-              <!-- Tax Year -->
-              <InputField
-                id="taxYear"
-                v-model="taxYear"
-                label="Tax Year"
-                type="number"
-                :min="2020"
-                :max="2030"
-                :error="errors.taxYear"
-                required
-              />
-            </div>
-
-            <!-- Options -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form @submit.prevent="calculateTax" class="space-y-6">
+          <!-- Income Type and Period -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
               <div class="space-y-4">
-                <label class="flex items-center">
-                  <input
-                    type="checkbox"
-                    v-model="includeNSSF"
-                    class="form-checkbox h-4 w-4 text-kenya-green"
-                  />
-                  <span class="ml-2 text-gray-700">Include NSSF Contribution</span>
-                </label>
-                <label class="flex items-center">
-                  <input
-                    type="checkbox"
-                    v-model="includeSHIF"
-                    class="form-checkbox h-4 w-4 text-kenya-green"
-                  />
-                  <span class="ml-2 text-gray-700">Include SHIF Contribution</span>
-                </label>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Income Type</label>
+                  <div class="flex space-x-4">
+                    <label class="inline-flex items-center">
+                      <input
+                        type="radio"
+                        v-model="incomeType"
+                        value="basic"
+                        class="form-radio text-green-600"
+                      />
+                      <span class="ml-2">Basic Pay</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                      <input
+                        type="radio"
+                        v-model="incomeType"
+                        value="net"
+                        class="form-radio text-green-600"
+                      />
+                      <span class="ml-2">Net Pay</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Payment Period</label>
+                  <div class="flex space-x-4">
+                    <label class="inline-flex items-center">
+                      <input
+                        type="radio"
+                        v-model="paymentPeriod"
+                        value="monthly"
+                        class="form-radio text-green-600"
+                      />
+                      <span class="ml-2">Monthly</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                      <input
+                        type="radio"
+                        v-model="paymentPeriod"
+                        value="annual"
+                        class="form-radio text-green-600"
+                      />
+                      <span class="ml-2">Annual</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-6">
+                <InputField
+                  id="income"
+                  v-model="income"
+                  :label="incomeType === 'basic' ? 'Basic Income (KES)' : 'Net Income (KES)'"
+                  type="text"
+                  :error="errors.income"
+                  :placeholder="paymentPeriod === 'monthly' ? '50,000' : '600,000'"
+                  @input="validateIncome"
+                />
               </div>
             </div>
 
-            <!-- Calculate Button -->
-            <div class="flex justify-end">
-              <Button
-                type="submit"
-                variant="kenya"
-                :loading="loading"
-                :disabled="loading"
-              >
-                Calculate Tax
-              </Button>
-            </div>
-          </form>
-        </div>
+            <div>
+              <div class="space-y-4">
+                <div class="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="includeNSSF"
+                    v-model="includeNSSF"
+                    class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                  />
+                  <label for="includeNSSF" class="ml-2 block text-sm text-gray-700">
+                    Include NSSF
+                  </label>
+                </div>
 
-        <!-- Results Section -->
-        <div v-if="calculation" class="space-y-8">
-          <!-- Summary Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white shadow rounded-lg p-6">
-              <h3 class="text-lg font-medium text-gray-900">Net Monthly Income</h3>
-              <p class="mt-2 text-3xl font-bold text-kenya-green">
-                {{ formatCurrency(calculation.monthlyNet) }}
-              </p>
-            </div>
+                <div class="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="includeSHIF"
+                    v-model="includeSHIF"
+                    class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                  />
+                  <label for="includeSHIF" class="ml-2 block text-sm text-gray-700">
+                    Include SHIF
+                  </label>
+                </div>
 
-            <div class="bg-white shadow rounded-lg p-6">
-              <h3 class="text-lg font-medium text-gray-900">Monthly Deductions</h3>
-              <p class="mt-2 text-3xl font-bold text-kenya-red">
-                {{ formatCurrency(calculation.monthlyDeductions) }}
-              </p>
-            </div>
-
-            <div class="bg-white shadow rounded-lg p-6">
-              <h3 class="text-lg font-medium text-gray-900">Effective Tax Rate</h3>
-              <p class="mt-2 text-3xl font-bold text-gray-900">
-                {{ formatPercentage(calculation.effectiveTaxRate) }}
-              </p>
+                <div class="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="includeHousing"
+                    v-model="includeHousingLevy"
+                    class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                  />
+                  <label for="includeHousing" class="ml-2 block text-sm text-gray-700">
+                    Include Housing Levy
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Detailed Breakdown -->
-          <div class="bg-white shadow rounded-lg overflow-hidden">
-            <div class="px-6 py-5 border-b border-gray-200">
-              <h3 class="text-lg font-medium text-gray-900">Tax Breakdown</h3>
-            </div>
-            <div class="px-6 py-5">
-              <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                <div>
-                  <dt class="text-sm font-medium text-gray-500">Gross Annual Income</dt>
-                  <dd class="mt-1 text-lg font-semibold text-gray-900">
-                    {{ formatCurrency(calculation.grossIncome) }}
-                  </dd>
-                </div>
-                <div>
-                  <dt class="text-sm font-medium text-gray-500">Taxable Income</dt>
-                  <dd class="mt-1 text-lg font-semibold text-gray-900">
-                    {{ formatCurrency(calculation.taxableIncome) }}
-                  </dd>
-                </div>
-                <div>
-                  <dt class="text-sm font-medium text-gray-500">Income Tax</dt>
-                  <dd class="mt-1 text-lg font-semibold text-gray-900">
-                    {{ formatCurrency(calculation.incomeTax) }}
-                  </dd>
-                </div>
-                <div>
-                  <dt class="text-sm font-medium text-gray-500">Personal Relief</dt>
-                  <dd class="mt-1 text-lg font-semibold text-gray-900">
-                    {{ formatCurrency(calculation.personalRelief) }}
-                  </dd>
-                </div>
-                <div v-if="includeNSSF">
-                  <dt class="text-sm font-medium text-gray-500">NSSF Contribution</dt>
-                  <dd class="mt-1 text-lg font-semibold text-gray-900">
-                    {{ formatCurrency(calculation.nssfContribution) }}
-                  </dd>
-                </div>
-                <div v-if="includeSHIF">
-                  <dt class="text-sm font-medium text-gray-500">SHIF Contribution</dt>
-                  <dd class="mt-1 text-lg font-semibold text-gray-900">
-                    {{ formatCurrency(calculation.shifContribution) }}
-                  </dd>
-                </div>
-                <div>
-                  <dt class="text-sm font-medium text-gray-500">Total Annual Tax</dt>
-                  <dd class="mt-1 text-lg font-semibold text-kenya-red">
-                    {{ formatCurrency(calculation.taxAfterRelief) }}
-                  </dd>
-                </div>
-                <div>
-                  <dt class="text-sm font-medium text-gray-500">Net Annual Income</dt>
-                  <dd class="mt-1 text-lg font-semibold text-kenya-green">
-                    {{ formatCurrency(calculation.netIncome) }}
-                  </dd>
-                </div>
-              </dl>
-            </div>
-          </div>
-
-          <!-- Monthly Breakdown -->
-          <div class="bg-white shadow rounded-lg overflow-hidden">
-            <div class="px-6 py-5 border-b border-gray-200">
-              <h3 class="text-lg font-medium text-gray-900">Monthly Breakdown</h3>
-            </div>
-            <div class="overflow-x-auto">
-              <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Month</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Gross</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">NSSF</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">SHIF</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Tax</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Net</th>
-                  </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                  <tr v-for="item in monthlyBreakdown" :key="item.month">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.month }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">{{ formatCurrency(item.grossIncome) }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">{{ formatCurrency(item.nssf) }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">{{ formatCurrency(item.shif) }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">{{ formatCurrency(item.tax) }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-kenya-green">{{ formatCurrency(item.netIncome) }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Action Buttons -->
-          <div class="flex justify-end space-x-4">
-            <Button variant="secondary" @click="downloadReport">
-              Download Report
-            </Button>
+          <!-- Calculate Button -->
+          <div class="flex justify-end">
             <Button
-              v-if="authStore.isAuthenticated"
+              type="submit"
               variant="kenya"
+              :loading="calculating"
+              :disabled="calculating || !income"
+            >
+              Calculate Tax
+            </Button>
+          </div>
+        </form>
+
+        <!-- Results -->
+        <div v-if="taxSummary" class="mt-8 space-y-6">
+          <div class="border-t border-gray-200 pt-6">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Tax Summary</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="text-sm font-medium text-gray-500">Gross Income</h3>
+                <p class="mt-1 text-2xl font-semibold text-gray-900">
+                  {{ formatCurrency(taxSummary.grossIncome) }}
+                </p>
+                <p class="text-sm text-gray-500">{{ paymentPeriod === 'monthly' ? 'per month' : 'per year' }}</p>
+              </div>
+              
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="text-sm font-medium text-gray-500">Net Income</h3>
+                <p class="mt-1 text-2xl font-semibold text-green-600">
+                  {{ formatCurrency(taxSummary.netIncome) }}
+                </p>
+                <p class="text-sm text-gray-500">{{ paymentPeriod === 'monthly' ? 'per month' : 'per year' }}</p>
+              </div>
+              
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="text-sm font-medium text-gray-500">Total Deductions</h3>
+                <p class="mt-1 text-2xl font-semibold text-red-600">
+                  {{ formatCurrency(taxSummary.totalDeductions) }}
+                </p>
+                <p class="text-sm text-gray-500">{{ formatPercentage(taxSummary.totalDeductions / taxSummary.grossIncome) }} of gross</p>
+              </div>
+            </div>
+
+            <!-- Detailed Breakdown -->
+            <div class="mt-6">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Deductions Breakdown</h3>
+              
+              <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                <div class="border-t border-gray-200">
+                  <dl>
+                    <div class="px-4 py-3 grid grid-cols-3 gap-4 bg-gray-50">
+                      <dt class="text-sm font-medium text-gray-500">PAYE Tax</dt>
+                      <dd class="text-sm text-gray-900 col-span-2">
+                        {{ formatCurrency(taxSummary.payeTax) }}
+                        <span class="text-gray-500">
+                          ({{ formatPercentage(taxSummary.payeTax / taxSummary.grossIncome) }})
+                        </span>
+                      </dd>
+                    </div>
+                    
+                    <div v-if="includeNSSF" class="px-4 py-3 grid grid-cols-3 gap-4">
+                      <dt class="text-sm font-medium text-gray-500">NSSF Contribution</dt>
+                      <dd class="text-sm text-gray-900 col-span-2">
+                        {{ formatCurrency(taxSummary.nssfContribution) }}
+                        <span class="text-gray-500">
+                          ({{ formatPercentage(taxSummary.nssfContribution / taxSummary.grossIncome) }})
+                        </span>
+                      </dd>
+                    </div>
+                    
+                    <div v-if="includeSHIF" class="px-4 py-3 grid grid-cols-3 gap-4 bg-gray-50">
+                      <dt class="text-sm font-medium text-gray-500">SHIF Contribution</dt>
+                      <dd class="text-sm text-gray-900 col-span-2">
+                        {{ formatCurrency(taxSummary.shifContribution) }}
+                        <span class="text-gray-500">
+                          ({{ formatPercentage(taxSummary.shifContribution / taxSummary.grossIncome) }})
+                        </span>
+                      </dd>
+                    </div>
+                    
+                    <div v-if="includeHousingLevy" class="px-4 py-3 grid grid-cols-3 gap-4">
+                      <dt class="text-sm font-medium text-gray-500">Housing Levy</dt>
+                      <dd class="text-sm text-gray-900 col-span-2">
+                        {{ formatCurrency(taxSummary.housingLevy) }}
+                        <span class="text-gray-500">
+                          ({{ formatPercentage(taxSummary.housingLevy / taxSummary.grossIncome) }})
+                        </span>
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+              </div>
+            </div>
+
+            <!-- Monthly Breakdown -->
+            <div v-if="monthlyBreakdown" class="mt-8">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Monthly Breakdown</h3>
+              
+              <div class="bg-white shadow overflow-hidden rounded-lg">
+                <table class="min-w-full divide-y divide-gray-200">
+                  <thead>
+                    <tr>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Month</th>
+                      <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Gross</th>
+                      <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Deductions</th>
+                      <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Net</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-200">
+                    <tr v-for="(month, index) in monthlyBreakdown" :key="index">
+                      <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{{ month.name }}</td>
+                      <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-900">
+                        {{ formatCurrency(month.gross) }}
+                      </td>
+                      <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-red-600">
+                        {{ formatCurrency(month.deductions) }}
+                      </td>
+                      <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-green-600 font-medium">
+                        {{ formatCurrency(month.net) }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Save Button -->
+          <div class="mt-6 flex justify-end">
+            <Button
               @click="saveCalculation"
+              variant="secondary"
               :loading="saving"
               :disabled="saving"
+              v-if="authStore.isAuthenticated"
             >
               Save Calculation
             </Button>
-            <router-link v-else to="/auth" custom v-slot="{ navigate }">
-              <Button variant="secondary" @click="navigate">
-                Sign in to save calculations
-              </Button>
-            </router-link>
+          
+            <!-- Login Prompt -->
+            <div v-else class="mt-6 bg-gray-50 p-4 rounded-lg">
+              <p class="text-sm text-gray-600">Want to save your calculations?</p>
+              <router-link
+                to="/auth"
+                class="mt-2 inline-flex items-center text-sm font-medium text-green-600 hover:text-green-500"
+              >
+                Sign in or create an account
+                <svg class="ml-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a 1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                </svg>
+              </router-link>
+            </div>
           </div>
+        </div>
+
+        <!-- Example Section -->
+        <div v-if="!taxSummary">
+          <TaxCalculatorExample />
         </div>
       </div>
     </div>
@@ -221,10 +286,10 @@ import { ref, computed } from 'vue';
 import { useAuthStore } from '../store/authStore';
 import {
   calculateNetIncome,
+  calculateGrossFromNet,
   formatCurrency,
   formatPercentage,
-  generateMonthlyBreakdown,
-  generateTaxSummary
+  generateMonthlyBreakdown
 } from '../utils/taxUtils';
 import { getTaxRates, saveTaxCalculation } from '../services/taxService';
 import { validateNumericInput } from '../utils/errorHandler';
@@ -245,14 +310,28 @@ export default {
     const taxYear = ref(new Date().getFullYear());
     const includeNSSF = ref(true);
     const includeSHIF = ref(true);
+    const includeHousingLevy = ref(false);
     const loading = ref(false);
+    const calculating = ref(false);
     const saving = ref(false);
     const errors = ref({});
     const calculation = ref(null);
+    const incomeType = ref('basic');
+    const paymentPeriod = ref('annual');
+    const nssfTiers = ref({
+      includeTierI: true,
+      includeTierII: true
+    });
+
+    const taxSummary = computed(() => calculation.value);
+
+    const validateIncome = (value) => {
+      return value > 0;
+    };
 
     const monthlyBreakdown = computed(() => {
-      if (!calculation.value) return [];
-      return generateMonthlyBreakdown(calculation.value);
+      if (!taxSummary.value) return [];
+      return generateMonthlyBreakdown(taxSummary.value);
     });
 
     const validateForm = () => {
@@ -260,7 +339,7 @@ export default {
       
       const incomeError = validateNumericInput(Number(income.value), {
         min: 0,
-        label: 'Annual Income'
+        label: `${incomeType.value === 'basic' ? 'Basic' : 'Net'} ${paymentPeriod.value === 'monthly' ? 'Monthly' : 'Annual'} Income`
       });
       if (incomeError) newErrors.income = incomeError;
 
@@ -278,50 +357,64 @@ export default {
     const calculateTax = async () => {
       if (!validateForm()) return;
 
-      loading.value = true;
+      calculating.value = true;
       try {
         const taxRates = await getTaxRates(taxYear.value);
+        
+        let annualValue = Number(income.value);
+        if (paymentPeriod.value === 'monthly') {
+          annualValue *= 12;
+        }
+
+        if (incomeType.value === 'net') {
+          annualValue = calculateGrossFromNet(annualValue / 12, {
+            includeNSSF: includeNSSF.value,
+            includeSHIF: includeSHIF.value,
+            includeHousingLevy: includeHousingLevy.value,
+            taxRates,
+            nssfTiers: nssfTiers.value,
+            personalRelief: taxRates.personalRelief
+          });
+        }
+
         calculation.value = calculateNetIncome({
-          annualIncome: Number(income.value),
+          annualIncome: annualValue,
           includeNSSF: includeNSSF.value,
           includeSHIF: includeSHIF.value,
+          includeHousingLevy: includeHousingLevy.value,
           taxRates,
-          personalRelief: taxRates.personalRelief
+          personalRelief: taxRates.personalRelief,
+          nssfTiers: nssfTiers.value
         });
       } catch (error) {
         console.error('Calculation error:', error);
-        // Handle error display
       } finally {
-        loading.value = false;
+        calculating.value = false;
       }
     };
 
     const saveCalculation = async () => {
-      if (!authStore.isAuthenticated || !calculation.value) return;
-
       saving.value = true;
       try {
-        await saveTaxCalculation(authStore.userId, {
-          ...calculation.value,
-          taxYear: taxYear.value,
-          includeNSSF: includeNSSF.value,
-          includeSHIF: includeSHIF.value
-        });
-        // Show success message
+        if (taxSummary.value) {
+          await saveTaxCalculation(authStore.userId || 'anonymous', {
+            ...taxSummary.value,
+            taxYear: taxYear.value,
+            includeNSSF: includeNSSF.value,
+            includeSHIF: includeSHIF.value,
+            includeHousingLevy: includeHousingLevy.value
+          });
+        }
       } catch (error) {
         console.error('Save error:', error);
-        // Handle error display
       } finally {
         saving.value = false;
       }
     };
 
     const downloadReport = () => {
-      if (!calculation.value) return;
-
-      const summary = generateTaxSummary(calculation.value);
-      // Implement report download logic
-      console.log('Downloading report:', summary);
+      if (!taxSummary.value) return;
+      console.log('Downloading report:', taxSummary.value);
     };
 
     const hasStartedCalculation = computed(() => income.value > 0);
@@ -331,7 +424,9 @@ export default {
       taxYear,
       includeNSSF,
       includeSHIF,
+      includeHousingLevy,
       loading,
+      calculating,
       saving,
       errors,
       calculation,
@@ -342,13 +437,30 @@ export default {
       formatCurrency,
       formatPercentage,
       authStore,
-      hasStartedCalculation
+      hasStartedCalculation,
+      incomeType,
+      paymentPeriod,
+      nssfTiers,
+      validateIncome,
+      taxSummary
     };
   }
 };
 </script>
 
 <style scoped>
+.text-primary {
+  color: #16A34A;  /* text-green-600 equivalent */
+}
+
+.bg-primary {
+  background-color: #16A34A;  /* bg-green-600 equivalent */
+}
+
+.bg-primary-dark {
+  background-color: #15803D;  /* bg-green-700 equivalent */
+}
+
 @media print {
   .no-print {
     display: none;

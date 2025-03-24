@@ -20,15 +20,47 @@ import { TAX_CONSTANTS, calculateDigitalServiceTax } from '../utils/taxUtils';
  */
 export const BILLING_CONSTANTS = {
   MINIMUM_HOURLY_RATES: {
-    designer: 2500, // KES per hour
-    writer: 2000,
-    musician: 3000,
-    general: 1500
+    designer: 2500, // KES per hour - Base rate for general design work
+    'ui-designer': 3500, // UI/UX specialists
+    'graphic-designer': 2800, // Graphic design specialists
+    'motion-designer': 3000, // Motion design and animation
+    writer: 2000, // Base rate for general writing
+    'technical-writer': 3000, // Technical documentation
+    'content-writer': 2200, // Content and copywriting
+    'scriptwriter': 2500, // Script and screenplay writing
+    musician: 3000, // Base rate for musicians
+    'music-producer': 3500, // Music production
+    'sound-engineer': 3200, // Sound engineering
+    'session-musician': 2500, // Session musicians
+    photographer: 2800, // Professional photography
+    videographer: 3200, // Professional videography
+    'social-media': 2000, // Social media management
+    'digital-artist': 2500, // Digital art and illustration
+    'voice-artist': 2200, // Voice-over work
+    'game-developer': 3500, // Game development
+    'animator': 3000, // 2D/3D animation
+    general: 1500 // Other creative work
   },
   RETAINER_SUGGESTIONS: {
-    designer: 50000, // Monthly retainer in KES
+    designer: 50000,
+    'ui-designer': 70000,
+    'graphic-designer': 55000,
+    'motion-designer': 60000,
     writer: 40000,
+    'technical-writer': 60000,
+    'content-writer': 45000,
+    'scriptwriter': 50000,
     musician: 60000,
+    'music-producer': 70000,
+    'sound-engineer': 65000,
+    'session-musician': 50000,
+    photographer: 55000,
+    videographer: 65000,
+    'social-media': 40000,
+    'digital-artist': 50000,
+    'voice-artist': 45000,
+    'game-developer': 70000,
+    'animator': 60000,
     general: 35000
   },
   PAYMENT_METHODS: [
@@ -86,6 +118,36 @@ export const PROJECT_PRICING_MODELS = {
         { name: 'Print Mockups', defaultCost: 15000 },
         { name: 'Client Presentation', defaultCost: 5000 }
       ],
+    }
+  ],
+  'ui-designer': [
+    {
+      name: 'UI/UX Design',
+      description: 'User interface and experience design',
+      pricingOptions: [
+        { type: 'fixed', label: 'Mobile App UI', defaultRate: 120000 },
+        { type: 'fixed', label: 'Web Application UI', defaultRate: 180000 },
+        { type: 'hourly', label: 'Hourly Rate', defaultRate: 3500, defaultHours: 40 }
+      ],
+      commonExpenses: [
+        { name: 'Prototyping Tools', defaultCost: 12000 },
+        { name: 'User Testing', defaultCost: 25000 }
+      ]
+    }
+  ],
+  'graphic-designer': [
+    {
+      name: 'Marketing Collateral',
+      description: 'Design for marketing materials',
+      pricingOptions: [
+        { type: 'fixed', label: 'Social Media Pack', defaultRate: 35000 },
+        { type: 'fixed', label: 'Business Package', defaultRate: 75000 },
+        { type: 'hourly', label: 'Hourly Rate', defaultRate: 2800, defaultHours: 25 }
+      ],
+      commonExpenses: [
+        { name: 'Stock Assets', defaultCost: 8000 },
+        { name: 'Printing Setup', defaultCost: 15000 }
+      ]
     }
   ],
   writer: [
@@ -168,6 +230,84 @@ export const PROJECT_PRICING_MODELS = {
         { name: 'Transport', defaultCost: 5000 },
         { name: 'Equipment Rental', defaultCost: 10000 }
       ],
+    }
+  ],
+  photographer: [
+    {
+      name: 'Photography Session',
+      description: 'Professional photography services',
+      pricingOptions: [
+        { type: 'fixed', label: 'Half Day Shoot', defaultRate: 35000 },
+        { type: 'fixed', label: 'Full Day Shoot', defaultRate: 65000 },
+        { type: 'hourly', label: 'Hourly Rate', defaultRate: 2800, defaultHours: 4 }
+      ],
+      commonExpenses: [
+        { name: 'Equipment Rental', defaultCost: 15000 },
+        { name: 'Location Fees', defaultCost: 10000 },
+        { name: 'Assistant', defaultCost: 5000 }
+      ]
+    }
+  ],
+  videographer: [
+    {
+      name: 'Video Production',
+      description: 'Professional video services',
+      pricingOptions: [
+        { type: 'fixed', label: 'Short Video', defaultRate: 50000 },
+        { type: 'fixed', label: 'Corporate Video', defaultRate: 150000 },
+        { type: 'hourly', label: 'Hourly Rate', defaultRate: 3200, defaultHours: 8 }
+      ],
+      commonExpenses: [
+        { name: 'Equipment Package', defaultCost: 25000 },
+        { name: 'Crew Members', defaultCost: 20000 },
+        { name: 'Post-Production', defaultCost: 30000 }
+      ]
+    }
+  ],
+  'voice-artist': [
+    {
+      name: 'Voice Over',
+      description: 'Professional voice recording',
+      pricingOptions: [
+        { type: 'fixed', label: 'Commercial (30s)', defaultRate: 15000 },
+        { type: 'fixed', label: 'Corporate Narration', defaultRate: 25000 },
+        { type: 'hourly', label: 'Hourly Rate', defaultRate: 2200, defaultHours: 2 }
+      ],
+      commonExpenses: [
+        { name: 'Studio Time', defaultCost: 8000 },
+        { name: 'Audio Editing', defaultCost: 5000 }
+      ]
+    }
+  ],
+  'social-media': [
+    {
+      name: 'Social Media Management',
+      description: 'Content creation and management',
+      pricingOptions: [
+        { type: 'fixed', label: 'Basic Monthly', defaultRate: 30000 },
+        { type: 'fixed', label: 'Premium Monthly', defaultRate: 60000 },
+        { type: 'hourly', label: 'Hourly Rate', defaultRate: 2000, defaultHours: 20 }
+      ],
+      commonExpenses: [
+        { name: 'Scheduling Tools', defaultCost: 5000 },
+        { name: 'Content Assets', defaultCost: 8000 }
+      ]
+    }
+  ],
+  'game-developer': [
+    {
+      name: 'Game Development',
+      description: 'Custom game development',
+      pricingOptions: [
+        { type: 'fixed', label: 'Mini Game', defaultRate: 150000 },
+        { type: 'fixed', label: 'Full Game', defaultRate: 500000 },
+        { type: 'hourly', label: 'Hourly Rate', defaultRate: 3500, defaultHours: 80 }
+      ],
+      commonExpenses: [
+        { name: 'Asset Licenses', defaultCost: 25000 },
+        { name: 'Testing Services', defaultCost: 30000 },
+        { name: 'Development Tools', defaultCost: 15000 }
+      ]
     }
   ],
   general: [

@@ -2,16 +2,26 @@
  * Constants for tax calculations
  */
 export const TAX_CONSTANTS = {
-  PERSONAL_RELIEF: 28800, // Annual personal relief
-  NSSF_TIER_I_MAX: 6000, // Monthly NSSF Tier I maximum
+  PERSONAL_RELIEF: 28800, // Annual personal relief (2400 monthly)
+  NSSF_TIER_I_MAX: 4320, // Monthly NSSF Tier I maximum (2.4% of 180,000)
   NSSF_TIER_II_MAX: 18000, // Monthly NSSF Tier II maximum
-  NSSF_RATE: 0.06, // 6% NSSF contribution rate
+  NSSF_RATE: 0.024, // 2.4% NSSF contribution rate (3rd Schedule Feb 2025)
+  SHIF_RATE: 0.0275, // 2.75% SHIF rate (replaces NHIF)
   SHIF_MIN_CONTRIBUTION: 300, // Minimum monthly SHIF contribution
-  SHIF_MAX_CONTRIBUTION: 1700, // Maximum monthly SHIF contribution
-  SHIF_RATE: 0.0275, // 2.75% of gross pay for SHIF
-  VAT_RATE: 0.16, // 16% VAT rate
-  DIGITAL_SERVICE_TAX_RATE: 0.015, // 1.5% Digital Service Tax
-  VAT_REGISTRATION_THRESHOLD: 5000000 // Annual turnover threshold for VAT registration (5M KES)
+  SHIF_MAX_CONTRIBUTION: 5000, // Maximum monthly SHIF contribution
+  HOUSING_LEVY_RATE: 0.015, // 1.5% Housing Levy
+  VAT_RATE: 0.16,
+  DIGITAL_SERVICE_TAX_RATE: 0.015,
+  VAT_REGISTRATION_THRESHOLD: 5000000,
+  TAX_BRACKETS: [
+    { min: 0, max: 24000, rate: 10 },
+    { min: 24000, max: 32333, rate: 25 },
+    { min: 32333, max: 500000, rate: 30 },
+    { min: 500000, max: 800000, rate: 32.5 },
+    { min: 800000, max: null, rate: 35 }
+  ],
+  NSSF_TIER_I_RATE: 0.024, // 2.4% for Tier I
+  NSSF_TIER_II_RATE: 0.024 // 2.4% for Tier II
 };
 
 /**
@@ -73,16 +83,37 @@ export function formatPercentage(value) {
 /**
  * Calculate NSSF contribution
  * @param {number} monthlyIncome Monthly gross income
+ * @param {Object} nssfTiers NSSF tier options
  * @returns {number} Monthly NSSF contribution
  */
-export function calculateNSSFContribution(monthlyIncome) {
-  const tierIContribution = Math.min(monthlyIncome * TAX_CONSTANTS.NSSF_RATE, TAX_CONSTANTS.NSSF_TIER_I_MAX);
-  const tierIIContribution = Math.min(
-    Math.max(0, monthlyIncome - TAX_CONSTANTS.NSSF_TIER_I_MAX) * TAX_CONSTANTS.NSSF_RATE,
-    TAX_CONSTANTS.NSSF_TIER_II_MAX
-  );
-  
-  return tierIContribution + tierIIContribution;
+export function calculateNSSFContribution(monthlyIncome, nssfTiers = { includeTierI: true, includeTierII: true }) {
+  const nssfCalc = calculateNSSFByTier(monthlyIncome, nssfTiers);
+  return nssfCalc.total;
+}
+
+/**
+ * Calculate NSSF contribution by tier
+ * @param {number} monthlyIncome Monthly gross income
+ * @param {Object} options NSSF calculation options
+ * @returns {Object} NSSF contributions by tier
+ */
+export function calculateNSSFByTier(monthlyIncome, { includeTierI = true, includeTierII = true } = {}) {
+  const tierI = includeTierI 
+    ? Math.min(monthlyIncome * TAX_CONSTANTS.NSSF_TIER_I_RATE, TAX_CONSTANTS.NSSF_TIER_I_MAX)
+    : 0;
+    
+  const tierII = includeTierII 
+    ? Math.min(
+        Math.max(0, monthlyIncome - TAX_CONSTANTS.NSSF_TIER_I_MAX) * TAX_CONSTANTS.NSSF_TIER_II_RATE,
+        TAX_CONSTANTS.NSSF_TIER_II_MAX
+      )
+    : 0;
+
+  return {
+    tierI,
+    tierII,
+    total: tierI + tierII
+  };
 }
 
 /**
@@ -92,10 +123,16 @@ export function calculateNSSFContribution(monthlyIncome) {
  */
 export function calculateSHIFContribution(monthlyIncome) {
   const contribution = monthlyIncome * TAX_CONSTANTS.SHIF_RATE;
-  return Math.max(
-    TAX_CONSTANTS.SHIF_MIN_CONTRIBUTION,
-    Math.min(contribution, TAX_CONSTANTS.SHIF_MAX_CONTRIBUTION)
-  );
+  return Math.min(Math.max(TAX_CONSTANTS.SHIF_MIN_CONTRIBUTION, contribution), TAX_CONSTANTS.SHIF_MAX_CONTRIBUTION);
+}
+
+/**
+ * Calculate housing levy
+ * @param {number} monthlyIncome Monthly gross income
+ * @returns {number} Monthly housing levy amount
+ */
+export function calculateHousingLevy(monthlyIncome) {
+  return monthlyIncome * TAX_CONSTANTS.HOUSING_LEVY_RATE;
 }
 
 /**
@@ -133,26 +170,34 @@ export function calculateNetIncome({
   annualIncome,
   includeNSSF = true,
   includeSHIF = true,
+  includeHousingLevy = true,
   taxRates,
+  nssfTiers = { includeTierI: true, includeTierII: true },
   personalRelief = TAX_CONSTANTS.PERSONAL_RELIEF
 }) {
   const monthlyIncome = annualIncome / 12;
   
-  // Calculate deductions
-  const monthlyNSSF = includeNSSF ? calculateNSSFContribution(monthlyIncome) : 0;
+  // Calculate statutory deductions with NSSF tiers
+  const nssfDetails = calculateNSSFByTier(monthlyIncome, nssfTiers);
+  const monthlyNSSF = includeNSSF ? nssfDetails.total : 0;
   const monthlySHIF = includeSHIF ? calculateSHIFContribution(monthlyIncome) : 0;
+  const monthlyHousingLevy = includeHousingLevy ? calculateHousingLevy(monthlyIncome) : 0;
   
-  // Calculate annual taxable income
+  // Calculate annual values
   const annualNSSF = monthlyNSSF * 12;
   const annualSHIF = monthlySHIF * 12;
-  const taxableIncome = annualIncome - (includeNSSF ? annualNSSF : 0);
+  const annualHousingLevy = monthlyHousingLevy * 12;
+  
+  // Calculate taxable income (deducting SHIF and Housing Levy as reliefs)
+  const taxableIncome = annualIncome - (includeNSSF ? annualNSSF : 0) - 
+    (includeSHIF ? annualSHIF : 0) - (includeHousingLevy ? annualHousingLevy : 0);
   
   // Calculate PAYE
   const incomeTax = calculatePAYE(taxableIncome, taxRates.brackets);
   const taxAfterRelief = Math.max(0, incomeTax - personalRelief);
   
-  // Calculate net income
-  const totalDeductions = taxAfterRelief + annualNSSF + annualSHIF;
+  // Calculate total deductions and net income
+  const totalDeductions = taxAfterRelief + annualNSSF + annualSHIF + annualHousingLevy;
   const netIncome = annualIncome - totalDeductions;
   
   return {
@@ -161,15 +206,82 @@ export function calculateNetIncome({
     incomeTax,
     personalRelief,
     nssfContribution: annualNSSF,
+    nssfTierI: nssfDetails.tierI * 12,
+    nssfTierII: nssfDetails.tierII * 12,
     shifContribution: annualSHIF,
+    housingLevy: annualHousingLevy,
     taxAfterRelief,
     totalDeductions,
     netIncome,
     monthlyGross: monthlyIncome,
     monthlyNet: netIncome / 12,
     monthlyDeductions: totalDeductions / 12,
-    effectiveTaxRate: totalDeductions / annualIncome
+    effectiveTaxRate: totalDeductions / annualIncome,
+    monthlyBreakdown: {
+      grossPay: monthlyIncome,
+      nssf: monthlyNSSF,
+      nssfTierI: nssfDetails.tierI,
+      nssfTierII: nssfDetails.tierII,
+      shif: monthlySHIF,
+      housingLevy: monthlyHousingLevy,
+      taxableIncome: taxableIncome / 12,
+      paye: taxAfterRelief / 12,
+      personalRelief: personalRelief / 12,
+      netPay: netIncome / 12
+    }
   };
+}
+
+/**
+ * Calculate gross income from net pay
+ * @param {number} targetNetPay Desired net monthly pay
+ * @param {Object} options Calculation options
+ * @returns {number} Required gross income
+ */
+export function calculateGrossFromNet(targetNetPay, {
+  includeNSSF = true,
+  includeSHIF = true,
+  includeHousingLevy = true,
+  taxRates,
+  nssfTiers = { includeTierI: true, includeTierII: true },
+  personalRelief = TAX_CONSTANTS.PERSONAL_RELIEF
+} = {}) {
+  let low = targetNetPay;
+  let high = targetNetPay * 3; // Initial upper bound
+  let iterations = 0;
+  const maxIterations = 20;
+  const tolerance = 0.01;
+
+  while (iterations < maxIterations) {
+    const testGross = (low + high) / 2;
+    const result = calculateNetIncome({
+      annualIncome: testGross * 12,
+      includeNSSF,
+      includeSHIF,
+      includeHousingLevy,
+      taxRates,
+      nssfTiers,
+      personalRelief
+    });
+
+    const testNet = result.monthlyNet;
+    const diff = testNet - targetNetPay;
+
+    if (Math.abs(diff) < tolerance) {
+      return testGross * 12;
+    }
+
+    if (diff > 0) {
+      high = testGross;
+    } else {
+      low = testGross;
+    }
+
+    iterations++;
+  }
+
+  // Return best approximation after max iterations
+  return (low + high) / 2 * 12;
 }
 
 /**
@@ -183,13 +295,11 @@ export function generateMonthlyBreakdown(calculation) {
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
   
-  return months.map(month => ({
-    month,
-    grossIncome: calculation.monthlyGross,
-    nssf: calculation.nssfContribution / 12,
-    shif: calculation.shifContribution / 12,
-    tax: calculation.taxAfterRelief / 12,
-    netIncome: calculation.monthlyNet
+  return months.map(name => ({
+    name,
+    gross: calculation.monthlyGross,
+    deductions: calculation.monthlyDeductions,
+    net: calculation.monthlyNet
   }));
 }
 

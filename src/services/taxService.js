@@ -43,15 +43,9 @@ export const DEFAULT_SETTINGS = {
 /**
  * Get tax rates for a specific year
  * @param {number} year Tax year
- * @param {boolean} isAuthenticated Whether the user is authenticated
  * @returns {Promise<Object>} Tax rates and brackets
  */
-export async function getTaxRates(year, isAuthenticated = false) {
-  // Return default rates if user is not authenticated
-  if (!isAuthenticated) {
-    return DEFAULT_TAX_RATES;
-  }
-
+export async function getTaxRates(year) {
   try {
     const ratesDoc = doc(db, COLLECTIONS.TAX_RATES, year.toString());
     const ratesSnapshot = await getDoc(ratesDoc);
@@ -105,15 +99,9 @@ export async function getUserCalculations(userId, limit = 10) {
 
 /**
  * Get tax settings
- * @param {boolean} isAuthenticated Whether the user is authenticated
  * @returns {Promise<Object>} Tax settings
  */
-export async function getTaxSettings(isAuthenticated = false) {
-  // Return default settings if user is not authenticated
-  if (!isAuthenticated) {
-    return DEFAULT_SETTINGS;
-  }
-
+export async function getTaxSettings() {
   try {
     const settingsDoc = doc(db, COLLECTIONS.SETTINGS, 'default');
     const settingsSnapshot = await getDoc(settingsDoc);
@@ -130,7 +118,7 @@ export async function getTaxSettings(isAuthenticated = false) {
 }
 
 /**
- * Update tax settings (admin only)
+ * Update tax settings
  * @param {Object} settings New tax settings
  * @returns {Promise<void>}
  */
@@ -140,7 +128,7 @@ export async function updateTaxSettings(settings) {
 }
 
 /**
- * Update tax rates (admin only)
+ * Update tax rates
  * @param {Object} rates Tax rates and brackets
  * @returns {Promise<void>}
  */

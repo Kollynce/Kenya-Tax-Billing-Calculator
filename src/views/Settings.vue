@@ -1,84 +1,90 @@
 <template>
   <div class="max-w-7xl mx-auto px-4 py-8">
-    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-      <!-- Header -->
-      <div class="bg-kenya-gradient p-6 text-white">
-        <h1 class="text-3xl font-bold">Settings</h1>
-        <p class="mt-2">Manage tax rates and system settings</p>
+    <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow-lg p-6">
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Tax Settings</h1>
+        <p class="mt-2 text-gray-600">Configure tax rates and thresholds for calculations</p>
       </div>
 
-      <div class="p-6">
-        <div v-if="!authStore.isAuthenticated" class="text-center py-8">
-          <p class="text-lg text-gray-600">Please sign in to access settings.</p>
-          <router-link to="/auth" class="mt-4 inline-block">
-            <Button variant="kenya">Sign In</Button>
-          </router-link>
-        </div>
-
-        <form v-else @submit.prevent="saveTaxRates" class="space-y-8">
-          <!-- Tax Brackets -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <form @submit.prevent="handleSubmit" class="space-y-8">
+          <!-- Income Tax Brackets -->
           <div>
-            <h2 class="text-xl font-semibold mb-4">Tax Brackets</h2>
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Income Tax Brackets</h3>
             <div class="space-y-4">
-              <div v-for="(bracket, index) in form.brackets" :key="index" class="p-4 border rounded-lg">
+              <div v-for="(bracket, index) in form.brackets" :key="index" class="p-4 bg-gray-50 rounded-lg">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <InputField
-                      :id="'bracket-min-' + index"
-                      v-model.number="bracket.min"
-                      label="Minimum (KES)"
-                      type="number"
-                      :error="getBracketError(index, 'min')"
-                    />
-                  </div>
-                  <div>
-                    <InputField
-                      :id="'bracket-max-' + index"
-                      v-model.number="bracket.max"
-                      label="Maximum (KES)"
-                      type="number"
-                      :error="getBracketError(index, 'max')"
-                      placeholder="Leave empty for no maximum"
-                    />
-                  </div>
-                  <div>
-                    <InputField
-                      :id="'bracket-rate-' + index"
-                      v-model.number="bracket.rate"
-                      label="Rate (%)"
-                      type="number"
-                      step="0.01"
-                      :error="getBracketError(index, 'rate')"
-                    />
-                  </div>
-                </div>
-                <div class="mt-2 flex justify-end">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    @click="removeBracket(index)"
-                    class="text-sm"
-                  >
-                    Remove Bracket
-                  </Button>
+                  <InputField
+                    :id="'bracketMin' + index"
+                    v-model.number="bracket.min"
+                    :label="index === 0 ? 'From (KES)' : 'From (KES)'"
+                    type="number"
+                    :error="bracketErrors[index]?.min"
+                    :disabled="index === 0"
+                  />
+                  <InputField
+                    :id="'bracketMax' + index"
+                    v-model.number="bracket.max"
+                    label="To (KES)"
+                    type="number"
+                    :error="bracketErrors[index]?.max"
+                    :placeholder="index === form.brackets.length - 1 ? 'No limit' : ''"
+                    :disabled="index === form.brackets.length - 1"
+                  />
+                  <InputField
+                    :id="'bracketRate' + index"
+                    v-model.number="bracket.rate"
+                    label="Rate (%)"
+                    type="number"
+                    step="0.01"
+                    :error="bracketErrors[index]?.rate"
+                  />
                 </div>
               </div>
+            </div>
+          </div>
 
-              <Button
-                type="button"
-                variant="secondary"
-                @click="addBracket"
-                class="w-full"
-              >
-                Add Tax Bracket
-              </Button>
+          <!-- NSSF Settings -->
+          <div>
+            <h3 class="text-lg font-medium text-gray-900 mb-4">NSSF Settings</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-gray-50 rounded-lg">
+              <InputField
+                id="nssfTierIRate"
+                v-model.number="form.nssfTierIRate"
+                label="Tier I Rate (%)"
+                type="number"
+                step="0.01"
+                :error="errors.nssfTierIRate"
+              />
+              <InputField
+                id="nssfTierIIRate"
+                v-model.number="form.nssfTierIIRate"
+                label="Tier II Rate (%)"
+                type="number"
+                step="0.01"
+                :error="errors.nssfTierIIRate"
+              />
+              <InputField
+                id="nssfTierILimit"
+                v-model.number="form.nssfTierILimit"
+                label="Tier I Monthly Limit (KES)"
+                type="number"
+                :error="errors.nssfTierILimit"
+              />
+              <InputField
+                id="nssfTierIILimit"
+                v-model.number="form.nssfTierIILimit"
+                label="Tier II Monthly Limit (KES)"
+                type="number"
+                :error="errors.nssfTierIILimit"
+              />
             </div>
           </div>
 
           <!-- SHIF Settings -->
           <div>
-            <h2 class="text-xl font-semibold mb-4">SHIF Settings</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">SHIF Settings</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-gray-50 rounded-lg">
               <InputField
                 id="shifRate"
                 v-model.number="form.shifRate"
@@ -88,66 +94,43 @@
                 :error="errors.shifRate"
               />
               <InputField
-                id="shifMin"
-                v-model.number="form.shifMin"
-                label="Minimum Annual SHIF (KES)"
+                id="shifMinContribution"
+                v-model.number="form.shifMinContribution"
+                label="Minimum Monthly Contribution (KES)"
                 type="number"
-                :error="errors.shifMin"
+                :error="errors.shifMinContribution"
+              />
+              <InputField
+                id="shifMaxContribution"
+                v-model.number="form.shifMaxContribution"
+                label="Maximum Monthly Contribution (KES)"
+                type="number"
+                :error="errors.shifMaxContribution"
               />
             </div>
           </div>
 
-          <!-- NSSF Settings -->
+          <!-- Housing Levy Settings -->
           <div>
-            <h2 class="text-xl font-semibold mb-4">NSSF Settings</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Housing Levy Settings</h3>
+            <div class="p-4 bg-gray-50 rounded-lg">
               <InputField
-                id="nssfRate"
-                v-model.number="form.nssfRate"
-                label="NSSF Rate (%)"
+                id="housingLevyRate"
+                v-model.number="form.housingLevyRate"
+                label="Housing Levy Rate (%)"
                 type="number"
                 step="0.01"
-                :error="errors.nssfRate"
-              />
-              <InputField
-                id="nssfMax"
-                v-model.number="form.nssfMax"
-                label="Maximum Monthly NSSF (KES)"
-                type="number"
-                :error="errors.nssfMax"
+                :error="errors.housingLevyRate"
               />
             </div>
           </div>
 
-          <!-- Other Settings -->
-          <div>
-            <h2 class="text-xl font-semibold mb-4">Other Settings</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InputField
-                id="personalRelief"
-                v-model.number="form.personalRelief"
-                label="Annual Personal Relief (KES)"
-                type="number"
-                :error="errors.personalRelief"
-              />
-              <InputField
-                id="vatRate"
-                v-model.number="form.vatRate"
-                label="VAT Rate (%)"
-                type="number"
-                step="0.01"
-                :error="errors.vatRate"
-              />
-            </div>
-          </div>
-
-          <div class="flex justify-end space-x-4">
-            <Button type="button" variant="secondary" @click="resetForm">
-              Reset
-            </Button>
-            <Button 
-              type="submit" 
-              variant="kenya" 
+          <!-- Submit Button -->
+          <div class="flex justify-end">
+            <Button
+              type="submit"
+              variant="kenya"
+              :loading="taxStore.loading"
               :disabled="taxStore.loading"
             >
               Save Changes
@@ -157,9 +140,6 @@
           <div v-if="taxStore.error" class="mt-4 text-red-600">
             {{ taxStore.error }}
           </div>
-          <div v-if="saveSuccess" class="mt-4 text-green-600">
-            Settings saved successfully!
-          </div>
         </form>
       </div>
     </div>
@@ -167,45 +147,51 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from '../store/authStore';
+import { ref, onMounted } from 'vue';
 import { useTaxStore } from '../store/taxStore';
 import InputField from '../components/InputField.vue';
 import Button from '../components/Button.vue';
 
 export default {
-  name: 'SettingsPage',
+  name: 'SettingsView',
   components: {
     InputField,
     Button
   },
   setup() {
-    const router = useRouter();
-    const authStore = useAuthStore();
     const taxStore = useTaxStore();
-    const errors = reactive({});
+    const errors = ref({});
     const bracketErrors = ref([]);
-    const saveSuccess = ref(false);
 
-    const form = reactive({
-      brackets: [],
-      shifRate: 0,
-      shifMin: 0,
-      nssfRate: 0,
-      nssfMax: 0,
-      personalRelief: 0,
-      vatRate: 0
+    const form = ref({
+      brackets: [
+        { min: 0, max: 24000, rate: 10 },
+        { min: 24001, max: 32333, rate: 25 },
+        { min: 32334, max: 500000, rate: 30 },
+        { min: 500001, max: 800000, rate: 32.5 },
+        { min: 800001, max: null, rate: 35 }
+      ],
+      shifRate: 2.75,
+      shifMinContribution: 300,
+      shifMaxContribution: 1000,
+      nssfTierIRate: 6,
+      nssfTierIIRate: 6,
+      nssfTierILimit: 6000,
+      nssfTierIILimit: 12000,
+      housingLevyRate: 1.5,
+      personalRelief: 28800,
+      vatRate: 16
     });
 
     const loadSettings = async () => {
       try {
         await taxStore.loadTaxRates();
         if (taxStore.taxRates) {
-          Object.assign(form, {
+          Object.assign(form.value, {
             ...taxStore.taxRates,
             shifRate: taxStore.taxRates.shifRate * 100,
-            nssfRate: taxStore.taxRates.nssfRate * 100,
+            nssfTierIRate: taxStore.taxRates.nssfTierIRate * 100,
+            nssfTierIIRate: taxStore.taxRates.nssfTierIIRate * 100,
             vatRate: taxStore.taxRates.vatRate * 100
           });
         }
@@ -215,24 +201,19 @@ export default {
     };
 
     const validateForm = () => {
-      errors.shifRate = '';
-      errors.shifMin = '';
-      errors.nssfRate = '';
-      errors.nssfMax = '';
-      errors.personalRelief = '';
-      errors.vatRate = '';
+      errors.value = {};
       bracketErrors.value = [];
       let isValid = true;
 
       // Validate tax brackets
-      form.brackets.forEach((bracket, index) => {
+      form.value.brackets.forEach((bracket, index) => {
         const bracketError = {};
         if (bracket.min < 0) {
-          bracketError.min = 'Minimum cannot be negative';
+          bracketError.min = 'Minimum value cannot be negative';
           isValid = false;
         }
         if (bracket.max && bracket.max <= bracket.min) {
-          bracketError.max = 'Maximum must be greater than minimum';
+          bracketError.max = 'Maximum value must be greater than minimum';
           isValid = false;
         }
         if (bracket.rate < 0 || bracket.rate > 100) {
@@ -245,98 +226,95 @@ export default {
       });
 
       // Validate other fields
-      if (form.shifRate < 0 || form.shifRate > 100) {
-        errors.shifRate = 'SHIF rate must be between 0 and 100';
+      if (form.value.shifRate < 0 || form.value.shifRate > 100) {
+        errors.value.shifRate = 'SHIF rate must be between 0 and 100';
         isValid = false;
       }
-      if (form.shifMin < 0) {
-        errors.shifMin = 'Minimum SHIF cannot be negative';
+      if (form.value.shifMinContribution < 0) {
+        errors.value.shifMinContribution = 'Minimum SHIF contribution cannot be negative';
         isValid = false;
       }
-      if (form.nssfRate < 0 || form.nssfRate > 100) {
-        errors.nssfRate = 'NSSF rate must be between 0 and 100';
+      if (form.value.shifMaxContribution < 0) {
+        errors.value.shifMaxContribution = 'Maximum SHIF contribution cannot be negative';
         isValid = false;
       }
-      if (form.nssfMax < 0) {
-        errors.nssfMax = 'Maximum NSSF cannot be negative';
+      if (form.value.nssfTierIRate < 0 || form.value.nssfTierIRate > 100) {
+        errors.value.nssfTierIRate = 'NSSF Tier I rate must be between 0 and 100';
         isValid = false;
       }
-      if (form.personalRelief < 0) {
-        errors.personalRelief = 'Personal relief cannot be negative';
+      if (form.value.nssfTierIIRate < 0 || form.value.nssfTierIIRate > 100) {
+        errors.value.nssfTierIIRate = 'NSSF Tier II rate must be between 0 and 100';
         isValid = false;
       }
-      if (form.vatRate < 0 || form.vatRate > 100) {
-        errors.vatRate = 'VAT rate must be between 0 and 100';
+      if (form.value.nssfTierILimit < 0) {
+        errors.value.nssfTierILimit = 'NSSF Tier I limit cannot be negative';
+        isValid = false;
+      }
+      if (form.value.nssfTierIILimit < 0) {
+        errors.value.nssfTierIILimit = 'NSSF Tier II limit cannot be negative';
+        isValid = false;
+      }
+      if (form.value.housingLevyRate < 0 || form.value.housingLevyRate > 100) {
+        errors.value.housingLevyRate = 'Housing levy rate must be between 0 and 100';
+        isValid = false;
+      }
+      if (form.value.personalRelief < 0) {
+        errors.value.personalRelief = 'Personal relief cannot be negative';
+        isValid = false;
+      }
+      if (form.value.vatRate < 0 || form.value.vatRate > 100) {
+        errors.value.vatRate = 'VAT rate must be between 0 and 100';
         isValid = false;
       }
 
       return isValid;
     };
 
-    const saveTaxRates = async () => {
+    const handleSubmit = async () => {
       if (!validateForm()) return;
 
       try {
-        const rates = {
-          ...form,
-          shifRate: form.shifRate / 100,
-          nssfRate: form.nssfRate / 100,
-          vatRate: form.vatRate / 100
-        };
-        await taxStore.updateRates(rates);
-        saveSuccess.value = true;
-        setTimeout(() => {
-          saveSuccess.value = false;
-        }, 3000);
+        await taxStore.updateRates({
+          ...form.value,
+          shifRate: form.value.shifRate / 100,
+          nssfTierIRate: form.value.nssfTierIRate / 100,
+          nssfTierIIRate: form.value.nssfTierIIRate / 100,
+          vatRate: form.value.vatRate / 100
+        });
+        // Show success message
       } catch (error) {
-        console.error('Error saving tax rates:', error);
+        console.error('Error saving settings:', error);
       }
-    };
-
-    const addBracket = () => {
-      form.brackets.push({
-        min: 0,
-        max: null,
-        rate: 0
-      });
-    };
-
-    const removeBracket = (index) => {
-      form.brackets.splice(index, 1);
-      bracketErrors.value.splice(index, 1);
-    };
-
-    const getBracketError = (index, field) => {
-      return bracketErrors.value[index]?.[field] || '';
     };
 
     const resetForm = () => {
       loadSettings();
-      errors.value = {};
-      bracketErrors.value = [];
-      saveSuccess.value = false;
     };
 
-    onMounted(() => {
-      if (!authStore.isAuthenticated) {
-        router.push('/auth');
-        return;
-      }
-      loadSettings();
-    });
+    onMounted(loadSettings);
 
     return {
       form,
       errors,
-      authStore,
+      bracketErrors,
       taxStore,
-      saveSuccess,
-      saveTaxRates,
-      addBracket,
-      removeBracket,
-      getBracketError,
+      handleSubmit,
       resetForm
     };
   }
 };
 </script>
+
+<style scoped>
+.text-primary {
+  color: #16A34A;  /* text-green-600 equivalent */
+}
+
+.bg-primary {
+  background-color: #16A34A;  /* bg-green-600 equivalent */
+}
+
+.bg-primary-dark {
+  background-color: #15803D;  /* bg-green-700 equivalent */
+}
+</style>

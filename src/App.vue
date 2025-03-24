@@ -1,16 +1,16 @@
 <template>
-  <div class="min-h-screen bg-gray-100">
+  <div class="min-h-screen bg-white">
     <!-- Navigation -->
-    <nav class="bg-white shadow-sm">
+    <nav class="fixed w-full bg-white/80 backdrop-blur-sm z-50 border-b border-gray-100">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
           <div class="flex">
             <div class="flex-shrink-0 flex items-center">
-              <router-link to="/" class="text-xl font-bold text-blue-600">
-                KE Tax & Billing
+              <router-link to="/" class="text-xl font-semibold">
+                <span class="gradient-text">KE Tax & Billing</span>
               </router-link>
             </div>
-            <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+            <div class="hidden sm:ml-8 sm:flex sm:space-x-8">
               <router-link
                 to="/tax-calculator"
                 class="nav-link"
@@ -42,12 +42,12 @@
               </router-link>
             </div>
           </div>
-          <div class="flex items-center">
+          <div class="flex items-center space-x-4">
             <template v-if="isAuthenticated">
-              <span class="text-gray-600 mr-4">{{ userEmail }}</span>
+              <span class="text-sm text-gray-600">{{ userEmail }}</span>
               <button
                 @click="logout"
-                class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none transition-colors duration-200"
               >
                 Logout
               </button>
@@ -55,9 +55,9 @@
             <router-link
               v-else
               to="/auth"
-              class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+              class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-full hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all duration-200 shadow-stripe-sm hover:shadow-stripe-md"
             >
-              Login
+              Sign in
             </router-link>
           </div>
         </div>
@@ -65,8 +65,13 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="py-6">
-      <router-view></router-view>
+    <main class="pt-16">
+      <LoadingScreen v-if="loading" />
+      <PageTransition>
+        <router-view v-slot="{ Component }">
+          <component :is="Component" />
+        </router-view>
+      </PageTransition>
     </main>
   </div>
 </template>
@@ -75,32 +80,43 @@
 import { ref, onMounted, computed } from 'vue';
 import { auth } from './firebase';
 import { useRouter } from 'vue-router';
+import LoadingScreen from './components/LoadingScreen.vue';
+import PageTransition from './components/PageTransition.vue';
 
 export default {
   name: 'App',
-  
+  components: {
+    LoadingScreen,
+    PageTransition
+  },
   setup() {
     const isAuthenticated = ref(false);
     const userEmail = ref('');
     const router = useRouter();
+    const loading = ref(false);
 
     const isAdmin = computed(() => {
       return isAuthenticated.value && userEmail.value.toLowerCase() === process.env.VUE_APP_ADMIN_EMAIL?.toLowerCase();
     });
 
     onMounted(() => {
+      loading.value = true;
       auth.onAuthStateChanged((user) => {
         isAuthenticated.value = !!user;
         userEmail.value = user ? user.email : '';
+        loading.value = false;
       });
     });
 
     const logout = async () => {
       try {
+        loading.value = true;
         await auth.signOut();
         router.push('/auth');
       } catch (error) {
         console.error('Error during logout:', error);
+      } finally {
+        loading.value = false;
       }
     };
 
@@ -108,7 +124,8 @@ export default {
       isAuthenticated,
       userEmail,
       isAdmin,
-      logout
+      logout,
+      loading
     };
   }
 };
@@ -116,33 +133,19 @@ export default {
 
 <style>
 .nav-link {
-  border-color: transparent;
-  color: #6b7280;  /* text-gray-500 */
-  display: inline-flex;
-  align-items: center;
-  padding-left: 0.25rem;
-  padding-right: 0.25rem;
-  padding-top: 0.25rem;
-  border-bottom-width: 2px;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.nav-link:hover {
-  border-color: #d1d5db;  /* hover:border-gray-300 */
-  color: #374151;  /* hover:text-gray-700 */
+  @apply inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-green-600 transition-colors duration-200;
+  border-bottom: 2px solid transparent;
 }
 
 .active-nav-link {
-  border-color: #3b82f6;  /* border-blue-500 */
-  color: #111827;  /* text-gray-900 */
-  display: inline-flex;
-  align-items: center;
-  padding-left: 0.25rem;
-  padding-right: 0.25rem;
-  padding-top: 0.25rem;
-  border-bottom-width: 2px;
-  font-size: 0.875rem;
-  font-weight: 500;
+  @apply inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 transition-colors duration-200;
+  border-bottom: 2px solid #16A34A;
+}
+
+.gradient-text {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(to right, #16A34A, #15803D);
 }
 </style>

@@ -1,21 +1,22 @@
 <template>
   <div class="max-w-7xl mx-auto px-4 py-8">
     <div v-if="proposalData" class="mb-6 text-right">
-      <button 
+      <Button 
         @click="downloadAsPDF"
-        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors mr-4"
+        variant="kenya"
+        class="mr-4"
       >
         Download as PDF
-      </button>
-      <button 
+      </Button>
+      <Button 
         @click="goBack"
-        class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+        variant="secondary"
       >
         Back to Planner
-      </button>
+      </Button>
     </div>
     
-    <div ref="proposalContainer" v-if="proposalData" class="bg-white p-8 shadow-lg rounded-lg">
+    <div ref="proposalContainer" v-if="proposalData" class="bg-gradient-to-br from-green-50 to-emerald-50 p-8 shadow-lg rounded-lg">
       <!-- Header -->
       <div class="flex justify-between items-start mb-10">
         <div>
@@ -32,90 +33,95 @@
       </div>
       
       <!-- Client Information -->
-      <div class="mb-8 p-4 bg-gray-50 rounded-md">
+      <div class="mb-8 p-4 bg-white rounded-md shadow-sm">
         <h2 class="text-lg font-medium text-gray-900 mb-2">Prepared For:</h2>
         <div v-if="proposalData.client?.name">
           <p class="font-medium">{{ proposalData.client.name }}</p>
-          <p v-if="proposalData.client?.address">{{ proposalData.client.address }}</p>
           <p v-if="proposalData.client?.email">{{ proposalData.client.email }}</p>
           <p v-if="proposalData.client?.phone">{{ proposalData.client.phone }}</p>
-        </div>
-        <p v-else class="text-gray-600 italic">No client information provided.</p>
-      </div>
-      
-      <!-- Service Overview -->
-      <div class="mb-8">
-        <h2 class="text-xl font-bold text-gray-900 border-b pb-2 mb-4">Service Overview</h2>
-        <div class="mb-4">
-          <h3 class="font-medium text-gray-900">{{ proposalData.serviceName }}</h3>
-          <p class="text-gray-600">{{ proposalData.serviceDescription }}</p>
+          <p v-if="proposalData.client?.address">{{ proposalData.client.address }}</p>
         </div>
       </div>
       
-      <!-- Proposal Content Sections -->
-      <div v-if="proposalData.sections && proposalData.sections.length > 0" class="mb-8 space-y-6">
-        <div v-for="(section, index) in proposalData.sections" :key="index" class="mb-6">
-          <h2 class="text-xl font-bold text-gray-900 border-b pb-2 mb-4">{{ section.title }}</h2>
-          <div class="text-gray-600 whitespace-pre-line">{{ section.content }}</div>
+      <!-- Service Details -->
+      <div class="mb-8 p-4 bg-white rounded-md shadow-sm">
+        <h2 class="text-xl font-bold text-gray-900 border-b pb-2 mb-4">Service Details</h2>
+        <div class="space-y-4">
+          <div>
+            <h3 class="text-lg font-medium text-gray-800 mb-2">{{ proposalData.serviceName }}</h3>
+            <p class="text-gray-600">{{ proposalData.serviceDescription }}</p>
+          </div>
+          
+          <div class="mt-4">
+            <h3 class="text-lg font-medium text-gray-800 mb-2">Pricing</h3>
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <div class="flex justify-between mb-2">
+                <span class="text-gray-600">{{ proposalData.pricingLabel }}</span>
+                <span class="font-medium">{{ formatCurrency(proposalData.rate) }}</span>
+              </div>
+              
+              <div v-if="proposalData.quantity > 1" class="flex justify-between mb-2">
+                <span class="text-gray-600">Quantity</span>
+                <span>× {{ proposalData.quantity }}</span>
+              </div>
+              
+              <div v-if="proposalData.hours" class="flex justify-between mb-2">
+                <span class="text-gray-600">Hours</span>
+                <span>× {{ proposalData.hours }}</span>
+              </div>
+              
+              <div v-if="proposalData.expenses.length > 0">
+                <div class="border-t border-gray-200 my-2"></div>
+                <h4 class="text-sm font-medium text-gray-700 mb-2">Additional Expenses:</h4>
+                <div v-for="expense in proposalData.expenses" :key="expense.name" class="flex justify-between text-sm">
+                  <span class="text-gray-600">{{ expense.name }}</span>
+                  <span>{{ formatCurrency(expense.cost) }}</span>
+                </div>
+              </div>
+              
+              <div v-if="proposalData.isVATRegistered || proposalData.includeDigitalServiceTax" class="border-t border-gray-200 mt-2 pt-2">
+                <div v-if="proposalData.isVATRegistered" class="flex justify-between text-sm">
+                  <span class="text-gray-600">VAT (16%)</span>
+                  <span>{{ formatCurrency(calculateVAT()) }}</span>
+                </div>
+                
+                <div v-if="proposalData.includeDigitalServiceTax" class="flex justify-between text-sm">
+                  <span class="text-gray-600">Digital Service Tax (1.5%)</span>
+                  <span>{{ formatCurrency(calculateDST()) }}</span>
+                </div>
+              </div>
+              
+              <div class="border-t border-gray-200 mt-2 pt-2">
+                <div class="flex justify-between text-lg font-bold">
+                  <span class="text-gray-900">Total</span>
+                  <span class="text-green-600">{{ formatCurrency(calculateTotal()) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       
-      <!-- Pricing -->
-      <div class="mb-8">
-        <h2 class="text-xl font-bold text-gray-900 border-b pb-2 mb-4">Investment</h2>
-        
-        <div class="mt-4">
-          <table class="w-full">
-            <thead>
-              <tr class="border-b-2 border-gray-200">
-                <th class="py-2 px-2 text-left text-gray-700">Description</th>
-                <th class="py-2 px-2 text-right text-gray-700">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="border-b border-gray-200">
-                <td class="py-2 px-2 text-gray-600">{{ proposalData.serviceName }}</td>
-                <td class="py-2 px-2 text-gray-600 text-right">{{ formatCurrency(proposalData.pricing.serviceSubtotal) }}</td>
-              </tr>
-              
-              <tr v-if="proposalData.pricing.expensesTotal > 0" class="border-b border-gray-200">
-                <td class="py-2 px-2 text-gray-600">Additional Expenses</td>
-                <td class="py-2 px-2 text-gray-600 text-right">{{ formatCurrency(proposalData.pricing.expensesTotal) }}</td>
-              </tr>
-              
-              <tr v-if="proposalData.pricing.vat > 0" class="border-b border-gray-200">
-                <td class="py-2 px-2 text-gray-600">VAT (16%)</td>
-                <td class="py-2 px-2 text-gray-600 text-right">{{ formatCurrency(proposalData.pricing.vat) }}</td>
-              </tr>
-              
-              <tr v-if="proposalData.pricing.dst > 0" class="border-b border-gray-200">
-                <td class="py-2 px-2 text-gray-600">Digital Service Tax (1.5%)</td>
-                <td class="py-2 px-2 text-gray-600 text-right">{{ formatCurrency(proposalData.pricing.dst) }}</td>
-              </tr>
-              
-              <tr class="font-medium">
-                <td class="py-3 px-2 text-gray-800">Total Investment</td>
-                <td class="py-3 px-2 text-gray-800 text-right font-bold">{{ formatCurrency(proposalData.pricing.total) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <!-- Timeline -->
+      <div v-if="proposalData.timeline" class="mb-8 p-4 bg-white rounded-md shadow-sm">
+        <h2 class="text-xl font-bold text-gray-900 border-b pb-2 mb-4">Project Timeline</h2>
+        <div class="text-gray-600 whitespace-pre-line">{{ proposalData.timeline }}</div>
       </div>
       
       <!-- Terms -->
-      <div class="mb-8">
+      <div v-if="proposalData.terms" class="mb-8 p-4 bg-white rounded-md shadow-sm">
         <h2 class="text-xl font-bold text-gray-900 border-b pb-2 mb-4">Terms & Conditions</h2>
         <div class="text-gray-600 whitespace-pre-line">{{ proposalData.terms }}</div>
       </div>
       
       <!-- Notes -->
-      <div v-if="proposalData.notes" class="mb-8">
+      <div v-if="proposalData.notes" class="mb-8 p-4 bg-white rounded-md shadow-sm">
         <h2 class="text-xl font-bold text-gray-900 border-b pb-2 mb-4">Additional Notes</h2>
         <div class="text-gray-600 whitespace-pre-line">{{ proposalData.notes }}</div>
       </div>
       
       <!-- Signature Area -->
-      <div class="mt-12 border-t pt-8">
+      <div class="mt-12 p-4 bg-white rounded-md shadow-sm">
         <div class="grid grid-cols-2 gap-12">
           <div>
             <p class="text-gray-600 mb-12">Client Acceptance:</p>
@@ -132,13 +138,14 @@
     </div>
     
     <div v-else class="bg-white p-8 shadow-lg rounded-lg text-center">
-      <p class="text-lg text-gray-600">No proposal data found. Please return to the Billing Planner.</p>
-      <button 
+      <p class="text-gray-600">No proposal data available</p>
+      <Button 
         @click="goBack"
-        class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+        variant="secondary"
+        class="mt-4"
       >
         Back to Planner
-      </button>
+      </Button>
     </div>
   </div>
 </template>
