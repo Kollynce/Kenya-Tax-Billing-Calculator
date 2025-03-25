@@ -713,6 +713,11 @@ export function calculateMarketBasedPricing({
     daily: recommendedHourlyRate * 8,
     weekly: recommendedHourlyRate * 40,
     monthly: recommendedHourlyRate * 160,
+    multipliers: {
+      experience: experienceMultiplier,
+      portfolio: 1 + portfolioBonus,
+      specialization: 1 + specializationBonus
+    },
     vatRegistration: {
       shouldRegister: (recommendedHourlyRate * 160 * 12) >= TAX_CONSTANTS.VAT_REGISTRATION_THRESHOLD,
       projectedAnnual: recommendedHourlyRate * 160 * 12,
@@ -1046,3 +1051,31 @@ Total estimated timeline: ${project.timeline || '4-6 weeks'}`
     notes: project.notes || ''
   };
 }
+
+export const PRICING_FACTORS = {
+  experience: {
+    title: 'Experience Level',
+    description: 'Years of professional experience directly impact your market value. Each year typically adds 5-10% to your base rate.',
+    impact: 'High'
+  },
+  portfolio: {
+    title: 'Portfolio Quality',
+    description: 'A strong portfolio with notable projects can justify premium rates. Quality work speaks for itself.',
+    impact: 'Medium'
+  },
+  market: {
+    title: 'Market Position',
+    description: 'Your specialization and market demand influence rates. Niche skills often command higher rates.',
+    impact: 'High'
+  },
+  overhead: {
+    title: 'Business Overhead',
+    description: 'Include costs like software, equipment, workspace, and professional development.',
+    impact: 'Medium'
+  },
+  location: {
+    title: 'Location & Market',
+    description: 'Rates vary by location and target market (local vs. international clients).',
+    impact: 'Medium'
+  }
+};

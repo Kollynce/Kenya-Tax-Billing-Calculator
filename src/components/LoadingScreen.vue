@@ -26,8 +26,6 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'LoadingScreen'
-};
+<script setup>
+// The component is currently a static loading screen with no reactive behavior
 </script>

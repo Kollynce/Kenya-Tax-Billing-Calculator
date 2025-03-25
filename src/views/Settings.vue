@@ -187,13 +187,20 @@ export default {
       try {
         await taxStore.loadTaxRates();
         if (taxStore.taxRates) {
-          Object.assign(form.value, {
-            ...taxStore.taxRates,
-            shifRate: taxStore.taxRates.shifRate * 100,
-            nssfTierIRate: taxStore.taxRates.nssfTierIRate * 100,
-            nssfTierIIRate: taxStore.taxRates.nssfTierIIRate * 100,
-            vatRate: taxStore.taxRates.vatRate * 100
-          });
+          const rates = taxStore.taxRates;
+          form.value = {
+            brackets: rates.brackets || form.value.brackets,
+            shifRate: typeof rates.shifRate === 'number' ? rates.shifRate * 100 : form.value.shifRate,
+            shifMinContribution: rates.shifMinContribution || form.value.shifMinContribution,
+            shifMaxContribution: rates.shifMaxContribution || form.value.shifMaxContribution,
+            nssfTierIRate: typeof rates.nssfTierIRate === 'number' ? rates.nssfTierIRate * 100 : form.value.nssfTierIRate,
+            nssfTierIIRate: typeof rates.nssfTierIIRate === 'number' ? rates.nssfTierIIRate * 100 : form.value.nssfTierIIRate,
+            nssfTierILimit: rates.nssfTierILimit || form.value.nssfTierILimit,
+            nssfTierIILimit: rates.nssfTierIILimit || form.value.nssfTierIILimit,
+            housingLevyRate: rates.housingLevyRate || form.value.housingLevyRate,
+            personalRelief: rates.personalRelief || form.value.personalRelief,
+            vatRate: typeof rates.vatRate === 'number' ? rates.vatRate * 100 : form.value.vatRate
+          };
         }
       } catch (error) {
         console.error('Error loading tax rates:', error);

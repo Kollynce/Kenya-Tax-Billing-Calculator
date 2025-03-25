@@ -25,7 +25,23 @@ export const useTaxStore = defineStore('tax', {
         this.loading = true;
         const currentYear = new Date().getFullYear();
         const rates = await getTaxRates(currentYear);
-        this.taxRates = rates;
+        
+        if (rates) {
+          this.taxRates = {
+            ...rates,
+            shifRate: Number(rates.shifRate || 0.0275),
+            nssfTierIRate: Number(rates.nssfTierIRate || 0.06),
+            nssfTierIIRate: Number(rates.nssfTierIIRate || 0.06),
+            vatRate: Number(rates.vatRate || 0.16),
+            housingLevyRate: Number(rates.housingLevyRate || 0.015),
+            personalRelief: Number(rates.personalRelief || 28800),
+            brackets: (rates.brackets || []).map(bracket => ({
+              min: Number(bracket.min || 0),
+              max: bracket.max === null ? null : Number(bracket.max || 0),
+              rate: Number(bracket.rate || 0)
+            }))
+          };
+        }
       } catch (error) {
         this.error = 'Failed to load tax rates';
         throw error;
@@ -98,8 +114,22 @@ export const useTaxStore = defineStore('tax', {
     async updateRates(rates) {
       try {
         this.loading = true;
-        await updateTaxRates(rates);
-        this.taxRates = rates;
+        const sanitizedRates = {
+          ...rates,
+          shifRate: Number(rates.shifRate || 0),
+          nssfTierIRate: Number(rates.nssfTierIRate || 0),
+          nssfTierIIRate: Number(rates.nssfTierIIRate || 0),
+          vatRate: Number(rates.vatRate || 0),
+          housingLevyRate: Number(rates.housingLevyRate || 0),
+          personalRelief: Number(rates.personalRelief || 0),
+          brackets: (rates.brackets || []).map(bracket => ({
+            min: Number(bracket.min || 0),
+            max: bracket.max === null ? null : Number(bracket.max || 0),
+            rate: Number(bracket.rate || 0)
+          }))
+        };
+        await updateTaxRates(sanitizedRates);
+        this.taxRates = sanitizedRates;
       } catch (error) {
         this.error = 'Failed to update tax rates';
         throw error;

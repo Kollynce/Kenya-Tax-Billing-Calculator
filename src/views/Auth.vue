@@ -1,136 +1,144 @@
 <template>
-  <div class="max-w-7xl mx-auto px-4 py-8">
-    <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow-lg p-6">
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">{{ isRegistering ? 'Create Account' : 'Sign In' }}</h1>
-        <p class="mt-2 text-gray-600">
-          {{ isRegistering ? 'Create your account to save calculations and manage billing' : 'Sign in to access your tax calculations and billing history' }}
+  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-emerald-50 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8 bg-white rounded-xl shadow-2xl p-6 sm:p-8">
+      <!-- Header -->
+      <div>
+        <h2 class="text-center text-3xl font-extrabold text-gray-900">
+          {{ isRegistering ? 'Create Account' : 'Welcome Back' }}
+        </h2>
+        <p class="mt-2 text-center text-sm text-gray-600">
+          {{ isRegistering ? 'Create your account to get started' : 'Sign in to manage your billing and tax calculations' }}
         </p>
       </div>
 
-      <div class="bg-white shadow rounded-lg p-6 max-w-md mx-auto">
-        <form @submit.prevent="handleSubmit" class="space-y-6">
+      <!-- Auth Form -->
+      <form @submit.prevent="handleSubmit" class="mt-8 space-y-6">
+        <div class="rounded-md space-y-4">
           <!-- Email -->
-          <div>
-            <InputField
-              id="email"
-              v-model="form.email"
-              label="Email"
-              type="email"
-              :error="errors.email"
-              required
-            />
-          </div>
+          <InputField
+            id="email"
+            v-model="form.email"
+            type="email"
+            label="Email address"
+            placeholder="you@example.com"
+            :error="errors.email"
+            required
+            autocomplete="email"
+          />
 
           <!-- Password -->
-          <div>
-            <InputField
-              id="password"
-              v-model="form.password"
-              label="Password"
-              type="password"
-              :error="errors.password"
-              required
-            />
-          </div>
+          <InputField
+            id="password"
+            v-model="form.password"
+            type="password"
+            label="Password"
+            :placeholder="isRegistering ? 'Create a strong password' : 'Enter your password'"
+            :error="errors.password"
+            required
+            autocomplete="current-password"
+          />
 
-          <!-- Confirm Password (Registration only) -->
-          <div v-if="isRegistering">
+          <!-- Registration Fields -->
+          <template v-if="isRegistering">
             <InputField
               id="confirmPassword"
               v-model="form.confirmPassword"
-              label="Confirm Password"
               type="password"
+              label="Confirm Password"
+              placeholder="Re-enter your password"
               :error="errors.confirmPassword"
               required
             />
-          </div>
 
-          <!-- Name (Registration only) -->
-          <div v-if="isRegistering">
             <InputField
               id="name"
               v-model="form.name"
-              label="Full Name"
               type="text"
+              label="Full Name"
+              placeholder="John Doe"
               :error="errors.name"
               required
             />
-          </div>
 
-          <!-- Phone (Registration only) -->
-          <div v-if="isRegistering">
             <InputField
               id="phone"
               v-model="form.phone"
-              label="Phone Number"
               type="tel"
-              :error="errors.phone"
+              label="Phone Number"
               placeholder="+254"
-              required
+              :error="errors.phone"
             />
-          </div>
+          </template>
+        </div>
 
-          <!-- Submit Button -->
-          <div>
-            <Button
-              type="submit"
-              variant="kenya"
-              class="w-full"
-              :loading="loading"
-              :disabled="loading"
-            >
-              {{ isRegistering ? 'Create Account' : 'Sign In' }}
-            </Button>
-          </div>
-
-          <!-- Error Message -->
-          <div v-if="authError" class="text-center text-red-600 text-sm">
-            {{ authError }}
-          </div>
-        </form>
-
-        <!-- Divider -->
-        <div class="mt-6">
-          <div class="relative">
-            <div class="absolute inset-0 flex items-center">
-              <div class="w-full border-t border-gray-300"></div>
-            </div>
-            <div class="relative flex justify-center text-sm">
-              <span class="px-2 bg-white text-gray-500">Or continue with</span>
-            </div>
-          </div>
-
-          <!-- Social Login -->
-          <div class="mt-6">
-            <button
-              @click="signInWithGoogle"
-              class="w-full inline-flex justify-center items-center gap-3 px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-            >
-              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                <path
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                />
+        <!-- Error Message -->
+        <div v-if="authError" class="rounded-md bg-red-50 p-4">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
               </svg>
-              Continue with Google
-            </button>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm text-red-700">{{ authError }}</p>
+            </div>
           </div>
         </div>
 
-        <!-- Toggle Register/Login -->
-        <div class="mt-6 text-center text-sm">
-          <p class="text-gray-600">
+        <!-- Submit Button -->
+        <Button
+          type="submit"
+          variant="kenya"
+          size="large"
+          class="w-full"
+          :loading="loading"
+          :disabled="loading"
+        >
+          {{ isRegistering ? 'Create Account' : 'Sign In' }}
+        </Button>
+
+        <!-- Divider -->
+        <div class="relative">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-200"></div>
+          </div>
+          <div class="relative flex justify-center text-sm">
+            <span class="px-2 bg-white text-gray-500">Or continue with</span>
+          </div>
+        </div>
+
+        <!-- Social Login -->
+        <Button
+          type="button"
+          variant="secondary"
+          size="large"
+          class="w-full"
+          :loading="loading"
+          :disabled="loading"
+          @click="signInWithGoogle"
+        >
+          <template v-slot:right-icon>
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+            </svg>
+          </template>
+          Continue with Google
+        </Button>
+
+        <!-- Toggle Auth Mode -->
+        <div class="text-center">
+          <p class="text-sm text-gray-600">
             {{ isRegistering ? 'Already have an account?' : 'Need an account?' }}
             <button
               type="button"
-              class="ml-1 text-green-600 hover:text-green-500 font-medium"
-              @click="toggleRegister"
+              class="ml-1 font-medium text-green-600 hover:text-green-500 focus:outline-none focus:underline transition ease-in-out duration-150"
+              @click="toggleAuthMode"
             >
               {{ isRegistering ? 'Sign in' : 'Create one' }}
             </button>
           </p>
         </div>
-      </div>
+      </form>
     </div>
   </div>
 </template>
@@ -169,6 +177,7 @@ export default {
       errors.value = {};
       let isValid = true;
 
+      // Email validation
       if (!form.value.email) {
         errors.value.email = 'Email is required';
         isValid = false;
@@ -177,6 +186,7 @@ export default {
         isValid = false;
       }
 
+      // Password validation
       if (!form.value.password) {
         errors.value.password = 'Password is required';
         isValid = false;
@@ -186,6 +196,7 @@ export default {
       }
 
       if (isRegistering.value) {
+        // Confirm password validation
         if (!form.value.confirmPassword) {
           errors.value.confirmPassword = 'Please confirm your password';
           isValid = false;
@@ -194,11 +205,13 @@ export default {
           isValid = false;
         }
 
+        // Name validation
         if (!form.value.name) {
           errors.value.name = 'Name is required';
           isValid = false;
         }
 
+        // Phone validation (optional)
         if (form.value.phone && !/^\+?[\d\s-]{10,}$/.test(form.value.phone)) {
           errors.value.phone = 'Please enter a valid phone number';
           isValid = false;
@@ -246,6 +259,13 @@ export default {
       isRegistering.value = !isRegistering.value;
       errors.value = {};
       authError.value = '';
+      form.value = {
+        email: '',
+        password: '',
+        confirmPassword: '',
+        name: '',
+        phone: ''
+      };
     };
 
     return {
@@ -263,15 +283,20 @@ export default {
 </script>
 
 <style scoped>
-.text-primary {
-  color: #16A34A;  /* text-green-600 equivalent */
+.min-h-screen {
+  min-height: 100vh;
 }
 
-.bg-primary {
-  background-color: #16A34A;  /* bg-green-600 equivalent */
+@media (max-width: 640px) {
+  .max-w-md {
+    max-width: 100%;
+    margin: 1rem;
+  }
 }
 
-.bg-primary-dark {
-  background-color: #15803D;  /* bg-green-700 equivalent */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .max-w-md {
+    max-width: 28rem;
+  }
 }
 </style>
