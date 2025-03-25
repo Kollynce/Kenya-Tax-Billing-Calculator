@@ -11,6 +11,7 @@
               </router-link>
             </div>
             <div class="hidden sm:ml-8 sm:flex sm:space-x-8">
+              <!-- Desktop navigation links -->
               <router-link
                 to="/tax-calculator"
                 class="nav-link"
@@ -43,19 +44,124 @@
             </div>
           </div>
           <div class="flex items-center space-x-4">
-            <template v-if="isAuthenticated">
-              <span class="text-sm text-gray-600">{{ userEmail }}</span>
-              <button
-                @click="logout"
-                class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none transition-colors duration-200"
+            <!-- Auth buttons - hidden on mobile -->
+            <div class="hidden sm:flex items-center space-x-4">
+              <template v-if="isAuthenticated">
+                <span class="text-sm text-gray-600">{{ userEmail }}</span>
+                <button
+                  @click="logout"
+                  class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none transition-colors duration-200"
+                >
+                  Logout
+                </button>
+              </template>
+              <router-link
+                v-else
+                to="/auth"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-full hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all duration-200 shadow-stripe-sm hover:shadow-stripe-md"
               >
-                Logout
+                Sign in
+              </router-link>
+            </div>
+            
+            <!-- Mobile menu button -->
+            <div class="flex items-center sm:hidden">
+              <button 
+                @click="mobileMenuOpen = !mobileMenuOpen" 
+                class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500"
+                aria-expanded="false"
+              >
+                <span class="sr-only">Open main menu</span>
+                <!-- Icon when menu is closed -->
+                <svg 
+                  v-if="!mobileMenuOpen" 
+                  class="block h-6 w-6" 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  stroke="currentColor" 
+                  aria-hidden="true"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                <!-- Icon when menu is open -->
+                <svg 
+                  v-else 
+                  class="block h-6 w-6" 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  stroke="currentColor" 
+                  aria-hidden="true"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Mobile menu -->
+      <div 
+        v-show="mobileMenuOpen" 
+        class="sm:hidden bg-white border-b border-gray-100 transition-all duration-300 ease-in-out"
+      >
+        <div class="pt-2 pb-4 space-y-1">
+          <router-link
+            to="/tax-calculator"
+            class="mobile-nav-link"
+            active-class="mobile-nav-link-active"
+            @click="mobileMenuOpen = false"
+          >
+            Tax Calculator
+          </router-link>
+          <router-link
+            to="/billing"
+            class="mobile-nav-link"
+            active-class="mobile-nav-link-active"
+            @click="mobileMenuOpen = false"
+          >
+            Billing Generator
+          </router-link>
+          <router-link
+            to="/billing-planner"
+            class="mobile-nav-link"
+            active-class="mobile-nav-link-active"
+            @click="mobileMenuOpen = false"
+          >
+            Billing Planner
+          </router-link>
+          <router-link
+            v-if="isAdmin"
+            to="/settings"
+            class="mobile-nav-link"
+            active-class="mobile-nav-link-active"
+            @click="mobileMenuOpen = false"
+          >
+            Settings
+          </router-link>
+        </div>
+        
+        <!-- Mobile auth buttons -->
+        <div class="pt-2 pb-3 border-t border-gray-200">
+          <div class="flex items-center justify-center px-4 py-2">
+            <template v-if="isAuthenticated">
+              <div class="flex flex-col items-center">
+                <span class="text-sm text-gray-600 mb-2">{{ userEmail }}</span>
+                <button
+                  @click="logout"
+                  class="w-full text-center px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-full hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all duration-200"
+                >
+                  Logout
+                </button>
+              </div>
             </template>
             <router-link
               v-else
               to="/auth"
-              class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-full hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all duration-200 shadow-stripe-sm hover:shadow-stripe-md"
+              class="w-full text-center px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-full hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all duration-200 shadow-stripe-sm hover:shadow-stripe-md"
+              @click="mobileMenuOpen = false"
             >
               Sign in
             </router-link>
@@ -86,7 +192,7 @@
       <!-- Footer Content -->
       <div class="bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
             <!-- Logo and About -->
             <div class="md:col-span-1">
               <div class="flex items-center mb-4">
@@ -206,15 +312,15 @@
                 <!-- Newsletter Signup -->
                 <div class="mt-6">
                   <h4 class="text-sm font-medium text-gray-900 mb-2">Stay Updated</h4>
-                  <form class="mt-2 flex">
+                  <form class="mt-2 flex flex-col sm:flex-row">
                     <input 
                       type="email" 
-                      class="px-3 py-2 border border-gray-200 rounded-l-lg focus:ring-green-500 focus:border-green-500 flex-grow text-sm"
+                      class="px-3 py-2 border border-gray-200 rounded-lg sm:rounded-r-none mb-2 sm:mb-0 focus:ring-green-500 focus:border-green-500 w-full text-sm"
                       placeholder="Your email"
                     />
                     <button 
                       type="submit" 
-                      class="flex-shrink-0 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-r-lg hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+                      class="w-full sm:w-auto px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg sm:rounded-l-none hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
                     >
                       Subscribe
                     </button>
@@ -232,10 +338,10 @@
                   &copy; {{ new Date().getFullYear() }} KE Tax & Billing | All rights reserved.
                 </p>
               </div>
-              <div class="flex space-x-6">
-                <a href="#" class="text-sm text-gray-500 hover:text-green-600 transition-colors duration-200">Privacy Policy</a>
-                <a href="#" class="text-sm text-gray-500 hover:text-green-600 transition-colors duration-200">Terms of Service</a>
-                <a href="#" class="text-sm text-gray-500 hover:text-green-600 transition-colors duration-200">Cookie Policy</a>
+              <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-6">
+                <a href="#" class="text-sm text-center text-gray-500 hover:text-green-600 transition-colors duration-200">Privacy Policy</a>
+                <a href="#" class="text-sm text-center text-gray-500 hover:text-green-600 transition-colors duration-200">Terms of Service</a>
+                <a href="#" class="text-sm text-center text-gray-500 hover:text-green-600 transition-colors duration-200">Cookie Policy</a>
               </div>
             </div>
           </div>
@@ -263,6 +369,7 @@ export default {
     const userEmail = ref('');
     const router = useRouter();
     const loading = ref(false);
+    const mobileMenuOpen = ref(false);
 
     const isAdmin = computed(() => {
       return isAuthenticated.value && userEmail.value.toLowerCase() === process.env.VUE_APP_ADMIN_EMAIL?.toLowerCase();
@@ -280,6 +387,7 @@ export default {
     const logout = async () => {
       try {
         loading.value = true;
+        mobileMenuOpen.value = false;
         await auth.signOut();
         router.push('/auth');
       } catch (error) {
@@ -294,7 +402,8 @@ export default {
       userEmail,
       isAdmin,
       logout,
-      loading
+      loading,
+      mobileMenuOpen
     };
   }
 };
@@ -311,10 +420,24 @@ export default {
   border-bottom: 2px solid #16A34A;
 }
 
+.mobile-nav-link {
+  @apply block pl-3 pr-4 py-3 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-green-600 transition-colors duration-200;
+}
+
+.mobile-nav-link-active {
+  @apply block pl-3 pr-4 py-3 text-base font-medium text-green-600 bg-green-50 border-l-4 border-green-500;
+}
+
 .gradient-text {
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
   background-image: linear-gradient(to right, #16A34A, #15803D);
+}
+
+@media (max-width: 640px) {
+  .footer-section {
+    margin-bottom: 2rem;
+  }
 }
 </style>

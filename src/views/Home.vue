@@ -3,6 +3,7 @@
     <!-- Hero Section -->
     <section class="bg-gradient-to-b from-white to-gray-50 py-12 my-16 rounded-xl border border-gray-100 shadow-lg transform hover:shadow-xl transition-all duration-500">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Left column with text content - unchanged -->
         <div class="flex flex-col justify-center space-y-6 px-6 md:px-8">
           <div class="mb-2 flex space-x-2">
             <span class="inline-block px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800 animate-pulse">
@@ -68,58 +69,68 @@
           </div>
         </div>
         
-        <div class="bg-white rounded-2xl p-8 shadow-2xl border border-gray-100 transform hover:scale-[1.02] transition-all duration-300 relative overflow-hidden mx-6 md:mx-8">
+        <!-- Right column with calculator - redesigned -->
+        <div class="bg-white rounded-2xl p-6 md:p-8 shadow-2xl border border-gray-100 transform hover:scale-[1.02] transition-all duration-300 relative overflow-hidden mx-4 md:mx-8">
           <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-green-100 to-blue-50 rounded-bl-full opacity-50"></div>
           
-          <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+          <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             Value-Based Rate Calculator
           </h2>
 
-          <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-green-200 transition-all duration-300">
-            <h3 class="font-medium text-gray-900 mb-2">Understanding Your Rate Factors</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div v-for="(factor, key) in PRICING_FACTORS" :key="key" class="flex items-start space-x-2">
-                <div class="mt-1">
-                  <svg class="w-4 h-4" :class="factor.impact === 'High' ? 'text-green-600' : 'text-blue-500'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <div>
-                  <p class="font-medium text-gray-900">{{ factor.title }}</p>
-                  <p class="text-gray-600 text-xs">{{ factor.description }}</p>
+          <!-- Collapsible section for pricing factors -->
+          <div class="mb-4">
+            <button 
+              @click="showPricingFactors = !showPricingFactors" 
+              class="flex items-center justify-between w-full py-2 px-3 bg-gray-50 rounded-lg border border-gray-200 hover:border-green-200 transition-all duration-300"
+            >
+              <span class="font-medium text-gray-900">Understanding Your Rate Factors</span>
+              <svg 
+                class="w-5 h-5 text-gray-400 transition-transform duration-300"
+                :class="{'rotate-180': showPricingFactors}"
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            <div v-if="showPricingFactors" class="mt-2 p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-green-200 transition-all duration-300">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div v-for="(factor, key) in PRICING_FACTORS" :key="key" class="flex items-start space-x-2">
+                  <div class="mt-1">
+                    <svg class="w-4 h-4" :class="factor.impact === 'High' ? 'text-green-600' : 'text-blue-500'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-medium text-gray-900">{{ factor.title }}</p>
+                    <p class="text-gray-600 text-xs">{{ factor.description }}</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="space-y-6 relative z-10">
+          <div class="space-y-4 relative z-10">
+            <!-- Essential calculator inputs -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
                 Your Creative Field
-                <span class="text-xs text-gray-500 ml-1">(Required)</span>
               </label>
               <div class="relative">
                 <select
                   v-model="selectedProfession"
                   class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                 >
-                  <optgroup label="Design & Visual Arts">
-                    <option v-for="option in professionOptions.filter(o => o.category === 'design')" 
-                            :key="option.value" 
-                            :value="option.value">
-                      {{ option.label }}
-                    </option>
-                  </optgroup>
-                  <optgroup label="Content Creation">
-                    <option v-for="option in professionOptions.filter(o => o.category === 'content')" 
-                            :key="option.value" 
-                            :value="option.value">
-                      {{ option.label }}
-                    </option>
-                  </optgroup>
+                  <option v-for="option in professionOptions" 
+                          :key="option.value" 
+                          :value="option.value">
+                    {{ option.label }}
+                  </option>
                 </select>
                 <div class="absolute right-3 top-3 text-gray-400">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -127,159 +138,123 @@
                   </svg>
                 </div>
               </div>
-              <p class="mt-1 text-xs text-gray-500">Choose your primary creative field for tailored rate suggestions</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Simplified experience and checkbox options in one row -->
+            <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Experience Level
-                  <span class="text-xs text-gray-500 ml-1">(Years)</span>
+                  Experience (Years)
                 </label>
-                <div class="flex items-center space-x-4">
-                  <input
-                    type="number"
-                    v-model="experienceYears"
-                    min="0"
-                    max="20"
-                    class="w-24 px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-                  />
-                  <div class="text-sm text-gray-600">
-                    <span class="font-medium">Impact:</span>
-                    <span class="text-green-600">+{{ Math.round((professionRates.multipliers.experience - 1) * 100) }}%</span>
-                  </div>
-                </div>
-                <p class="mt-1 text-xs text-gray-500">Each year adds 5-10% to your base rate (up to 100%)</p>
+                <input
+                  type="number"
+                  v-model="experienceYears"
+                  min="0"
+                  max="20"
+                  class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                />
               </div>
 
-              <div class="space-y-3">
-                <div class="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200 group cursor-pointer border border-transparent hover:border-green-200"
+              <div class="space-y-2">
+                <div class="flex items-center space-x-3 p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200 cursor-pointer border border-transparent hover:border-green-200"
                      @click="hasPortfolio = !hasPortfolio">
                   <input
                     type="checkbox"
                     v-model="hasPortfolio"
                     class="w-5 h-5 text-green-600 rounded focus:ring-green-500"
                   />
-                  <div>
-                    <label class="text-sm text-gray-700 font-medium cursor-pointer">Portfolio Available</label>
-                    <p class="text-xs text-gray-500">Impact: <span class="text-green-600">+15%</span></p>
-                  </div>
+                  <label class="text-sm text-gray-700 font-medium cursor-pointer">Portfolio Available</label>
                 </div>
-                <div class="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200 group cursor-pointer border border-transparent hover:border-green-200"
+                <div class="flex items-center space-x-3 p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200 cursor-pointer border border-transparent hover:border-green-200"
                      @click="isVATRegistered = !isVATRegistered">
                   <input
                     type="checkbox"
                     v-model="isVATRegistered"
                     class="w-5 h-5 text-green-600 rounded focus:ring-green-500"
                   />
-                  <div>
-                    <label class="text-sm text-gray-700 font-medium cursor-pointer">VAT Registered</label>
-                    <p class="text-xs text-gray-500">Adds 16% VAT to your rates</p>
-                  </div>
+                  <label class="text-sm text-gray-700 font-medium cursor-pointer">VAT Registered</label>
                 </div>
               </div>
             </div>
 
-            <div class="bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 shadow-lg border border-gray-100 hover:border-green-200 transition-all duration-300">
-              <div class="mb-4">
+            <!-- Rate results in a compact format -->
+            <div class="bg-gradient-to-br from-gray-50 to-white rounded-xl p-5 shadow-lg border border-gray-100 hover:border-green-200 transition-all duration-300">
+              <div class="flex justify-between items-center mb-3">
                 <h3 class="font-semibold text-gray-900 flex items-center">
                   <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 8h6m-5 0a3 3 0 110 6H9l3 3m-3-6h6m6 1a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   Your Professional Value
                 </h3>
-                <p class="text-sm text-gray-600 mt-1">Based on market research and your qualifications</p>
+                <button 
+                  @click="showDetailedRates = !showDetailedRates"
+                  class="text-sm text-green-600 hover:text-green-700 flex items-center"
+                >
+                  {{ showDetailedRates ? 'Less' : 'More' }} details
+                  <svg 
+                    class="w-4 h-4 ml-1 transition-transform duration-300" 
+                    :class="{'rotate-180': showDetailedRates}"
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
               </div>
 
-              <div class="grid grid-cols-2 gap-4">
-                <div class="relative p-4 bg-white rounded-lg shadow-sm border border-gray-100 hover:border-green-200 transition-all duration-200 group">
-                  <div class="absolute top-2 right-2">
-                    <div class="group-hover:visible invisible transition-opacity">
-                      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div class="text-sm text-gray-600 mb-1">Recommended Hourly Rate</div>
-                  <div class="text-xl font-bold text-green-600">{{ formatCurrency(professionRates.recommended) }}</div>
-                  <p class="text-xs text-gray-500 mt-1">Market-aligned base rate</p>
+              <!-- Primary rate display - always visible -->
+              <div class="flex mb-3">
+                <div class="flex-1 p-3 bg-white rounded-lg shadow-sm border border-gray-100 hover:border-green-200 transition-all duration-200">
+                  <div class="text-sm text-gray-600">Hourly Rate</div>
+                  <div class="text-2xl font-bold text-green-600">{{ formatCurrency(professionRates.recommended) }}</div>
                 </div>
-                
-                <div class="relative p-4 bg-white rounded-lg shadow-sm border border-gray-100 hover:border-green-200 transition-all duration-200 group">
-                  <div class="absolute top-2 right-2">
-                    <div class="group-hover:visible invisible transition-opacity">
-                      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div class="text-sm text-gray-600 mb-1">Daily Rate (8hrs)</div>
-                  <div class="text-xl font-bold text-green-600">{{ formatCurrency(professionRates.daily) }}</div>
-                  <p class="text-xs text-gray-500 mt-1">Standard workday equivalent</p>
-                </div>
-                
-                <div class="relative p-4 bg-white rounded-lg shadow-sm border border-gray-100 hover:border-green-200 transition-all duration-200 group">
-                  <div class="absolute top-2 right-2">
-                    <div class="group-hover:visible invisible transition-opacity">
-                      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div class="text-sm text-gray-600 mb-1">Monthly Earning Potential</div>
-                  <div class="text-xl font-bold text-green-600">{{ formatCurrency(professionRates.monthly) }}</div>
-                  <p class="text-xs text-gray-500 mt-1">Based on 22 working days</p>
-                </div>
-                
-                <div v-if="isVATRegistered" class="relative p-4 bg-white rounded-lg shadow-sm border border-gray-100 hover:border-green-200 transition-all duration-200 group">
-                  <div class="absolute top-2 right-2">
-                    <div class="group-hover:visible invisible transition-opacity">
-                      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div class="text-sm text-gray-600 mb-1">Rate with VAT (16%)</div>
-                  <div class="text-xl font-bold text-green-600">{{ formatCurrency(professionRates.recommendedWithVAT) }}</div>
-                  <p class="text-xs text-gray-500 mt-1">For VAT registered businesses</p>
+                <div class="flex-1 p-3 ml-3 bg-white rounded-lg shadow-sm border border-gray-100 hover:border-green-200 transition-all duration-200">
+                  <div class="text-sm text-gray-600">Daily Rate</div>
+                  <div class="text-2xl font-bold text-green-600">{{ formatCurrency(professionRates.daily) }}</div>
                 </div>
               </div>
 
-              <div class="mt-4 space-y-3">
-                <div class="p-3 bg-blue-50 rounded-lg border border-blue-100 hover:border-blue-200 transition-all duration-200">
+              <!-- Detailed rates - only visible when expanded -->
+              <div v-if="showDetailedRates" class="space-y-3 pt-2 animate-fade-in">
+                <div class="flex">
+                  <div class="flex-1 p-3 bg-white rounded-lg shadow-sm border border-gray-100 hover:border-green-200 transition-all duration-200">
+                    <div class="text-sm text-gray-600">Monthly Potential</div>
+                    <div class="text-lg font-bold text-green-600">{{ formatCurrency(professionRates.monthly) }}</div>
+                  </div>
+                  <div v-if="isVATRegistered" class="flex-1 p-3 ml-3 bg-white rounded-lg shadow-sm border border-gray-100 hover:border-green-200 transition-all duration-200">
+                    <div class="text-sm text-gray-600">With VAT (16%)</div>
+                    <div class="text-lg font-bold text-green-600">{{ formatCurrency(professionRates.recommendedWithVAT) }}</div>
+                  </div>
+                </div>
+
+                <div v-if="hasPortfolio" class="p-2 bg-green-50 rounded-lg border border-green-100 hover:border-green-200 transition-all duration-200">
                   <div class="flex items-start">
-                    <svg class="w-5 h-5 text-blue-600 mt-0.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-green-600 mt-0.5 mr-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
-                    <div>
-                      <p class="text-sm text-blue-900">
-                        Your {{ experienceYears }} years of experience adds a 
-                        <span class="font-medium">{{ Math.round((professionRates.multipliers.experience - 1) * 100) }}%</span> 
-                        premium to your base rate
-                      </p>
-                    </div>
+                    <p class="text-xs text-green-800">
+                      Portfolio adds 15% premium to your rates
+                    </p>
                   </div>
                 </div>
 
-                <div v-if="hasPortfolio" class="p-3 bg-green-50 rounded-lg border border-green-100 hover:border-green-200 transition-all duration-200">
+                <div class="p-2 bg-blue-50 rounded-lg border border-blue-100 hover:border-blue-200 transition-all duration-200">
                   <div class="flex items-start">
-                    <svg class="w-5 h-5 text-green-600 mt-0.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    <svg class="w-4 h-4 text-blue-600 mt-0.5 mr-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
-                    <div>
-                      <p class="text-sm text-green-900">
-                        Your portfolio demonstrates expertise, adding a 15% premium to your rates
-                      </p>
-                    </div>
+                    <p class="text-xs text-blue-800">
+                      {{ experienceYears }} years experience adds {{ Math.round((professionRates.multipliers.experience - 1) * 100) }}% premium
+                    </p>
                   </div>
-                </div>
-
-                <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-all duration-200">
-                  <p class="text-sm text-gray-700">
-                    These rates are based on current market standards in Kenya, considering your experience{{ hasPortfolio ? ', portfolio' : '' }}{{ isVATRegistered ? ', and VAT registration' : '' }}. Use them as a starting point for your pricing strategy.
-                  </p>
                 </div>
               </div>
+
+              <!-- Always visible note at the bottom -->
+              <p class="text-xs text-gray-500 mt-3">
+                Based on Kenya market standards. Use as starting point for pricing.
+              </p>
             </div>
           </div>
         </div>
@@ -856,33 +831,15 @@ export default {
     const experienceYears = ref(1);
     const hasPortfolio = ref(false);
     const isVATRegistered = ref(false);
+    const showPricingFactors = ref(false);
+    const showDetailedRates = ref(false);
 
     const professionOptions = ref([
-      {
-        category: 'design',
-        value: 'designer',
-        label: 'Graphic Designer'
-      },
-      {
-        category: 'content',
-        value: 'writer',
-        label: 'Content Writer'
-      },
-      {
-        category: 'content',
-        value: 'musician',
-        label: 'Musician/Producer'
-      },
-      {
-        category: 'design',
-        value: 'photographer',
-        label: 'Photographer'
-      },
-      {
-        category: 'content',
-        value: 'general',
-        label: 'Other Creative'
-      }
+      { value: 'designer', label: 'Graphic Designer' },
+      { value: 'writer', label: 'Content Writer' },
+      { value: 'musician', label: 'Musician/Producer' },
+      { value: 'photographer', label: 'Photographer' },
+      { value: 'general', label: 'Other Creative' }
     ]);
 
     const professionRates = computed(() => {
@@ -903,7 +860,9 @@ export default {
       professionOptions,
       BILLING_CONSTANTS,
       PRICING_FACTORS,
-      formatCurrency
+      formatCurrency,
+      showPricingFactors,
+      showDetailedRates
     };
   }
 };
@@ -930,12 +889,22 @@ section:hover {
 }
 
 .animate-fade-in {
-  animation: fadeIn 1s ease-in-out;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Add transition for rotate */
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* Scale effect for hover */
+.hover\:scale-102:hover {
+  transform: scale(1.02);
 }
 
 </style>
