@@ -1,121 +1,178 @@
 <template>
-  <section class="mb-16">
-    <h2 class="text-2xl font-bold text-gray-900 mb-6">Tax Calculator Example</h2>
-    
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden p-6 mb-8">
-      <h3 class="text-xl font-semibold text-gray-900 mb-4">Income Tax Calculation</h3>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div>
-          <h4 class="font-medium text-gray-800 mb-2">Sample Input:</h4>
-          <div class="bg-gray-50 p-4 rounded-lg mb-4">
-            <p><strong>Annual Income:</strong> KES 2,160,000</p>
-            <p><strong>Include NSSF:</strong> Yes</p>
-            <p><strong>Include SHIF:</strong> Yes</p>
-            <p><strong>Include Housing Levy:</strong> Yes</p>
-          </div>
-          
-          <p class="text-gray-600 text-sm">
-            The calculator automatically applies the latest 2025 tax rates and reliefs:
-          </p>
-          <ul class="mt-2 space-y-2 text-sm text-gray-600">
-            <li>• Personal Relief: KES 2,400 monthly</li>
-            <li>• NSSF: 2.4% of gross pay (new rates from Feb 2025)</li>
-            <li>• SHIF: 2.75% of gross pay</li>
-            <li>• Housing Levy: 1.5% of gross pay</li>
-          </ul>
-        </div>
-        
-        <div>
-          <h4 class="font-medium text-gray-800 mb-2">Sample Result:</h4>
-          <div class="bg-blue-50 p-4 rounded-lg">
-            <div class="grid grid-cols-2 gap-2 mb-3">
-              <div class="text-gray-600">Monthly Gross:</div>
-              <div class="font-medium text-right">KES 180,000</div>
-              
-              <div class="text-gray-600">NSSF (2.4%):</div>
-              <div class="font-medium text-right">KES 4,320</div>
-              
-              <div class="text-gray-600">SHIF (2.75%):</div>
-              <div class="font-medium text-right">KES 4,950</div>
-              
-              <div class="text-gray-600">Housing Levy (1.5%):</div>
-              <div class="font-medium text-right">KES 2,700</div>
-              
-              <div class="text-gray-600">Taxable Pay:</div>
-              <div class="font-medium text-right">KES 168,030</div>
-              
-              <div class="text-gray-600">PAYE:</div>
-              <div class="font-medium text-right">KES 45,193</div>
-              
-              <div class="text-gray-600">Personal Relief:</div>
-              <div class="font-medium text-right">-KES 2,400</div>
-              
-              <div class="text-gray-600">Total Deductions:</div>
-              <div class="font-medium text-right">KES 54,763</div>
-              
-              <div class="text-gray-600 font-medium">Net Monthly:</div>
-              <div class="font-bold text-right text-blue-600">KES 125,237</div>
+  <div class="space-y-8">
+    <!-- Example Header -->
+    <div class="flex items-center justify-between">
+      <div>
+        <h3 class="text-2xl font-bold text-gray-900 gradient-heading">Creative Tax Example</h3>
+        <p class="text-gray-600 mt-1">See how your taxes are calculated using 2025 rates</p>
+      </div>
+      <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-sm font-medium">
+        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Interactive Example
+      </span>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:border-green-200 transition-all duration-200">
+        <div class="text-sm text-gray-500 mb-1">Monthly Gross</div>
+        <div class="text-2xl font-bold text-gray-900">KES 180,000</div>
+        <div class="text-xs text-gray-500 mt-1">Annual: KES 2,160,000</div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:border-green-200 transition-all duration-200">
+        <div class="text-sm text-gray-500 mb-1">Take Home Pay</div>
+        <div class="text-2xl font-bold text-green-600">KES 125,237</div>
+        <div class="text-xs text-gray-500 mt-1">After all deductions</div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:border-green-200 transition-all duration-200">
+        <div class="text-sm text-gray-500 mb-1">Effective Tax Rate</div>
+        <div class="text-2xl font-bold text-blue-600">30.42%</div>
+        <div class="text-xs text-gray-500 mt-1">Including all deductions</div>
+      </div>
+    </div>
+
+    <!-- Deductions Breakdown -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100">
+      <div class="border-b border-gray-100 p-4">
+        <h4 class="text-lg font-semibold text-gray-900">Monthly Deductions Breakdown</h4>
+      </div>
+      <div class="p-4">
+        <div class="space-y-4">
+          <!-- PAYE Section -->
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <div class="flex justify-between items-center mb-2">
+              <span class="font-medium text-gray-700">PAYE Tax</span>
+              <span class="text-red-600 font-medium">KES 45,193</span>
             </div>
-            <div class="text-xs text-gray-500">
-              Effective Tax Rate: 30.42%
+            <div class="text-xs text-gray-500">After personal relief of KES 2,400</div>
+          </div>
+
+          <!-- Statutory Deductions -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <div class="flex justify-between items-center mb-1">
+                <span class="font-medium text-gray-700">NSSF</span>
+                <span class="text-red-600 font-medium">KES 4,320</span>
+              </div>
+              <div class="text-xs text-gray-500">2.4% of gross pay</div>
+            </div>
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <div class="flex justify-between items-center mb-1">
+                <span class="font-medium text-gray-700">SHIF</span>
+                <span class="text-red-600 font-medium">KES 4,950</span>
+              </div>
+              <div class="text-xs text-gray-500">2.75% of gross pay</div>
+            </div>
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <div class="flex justify-between items-center mb-1">
+                <span class="font-medium text-gray-700">Housing Levy</span>
+                <span class="text-red-600 font-medium">KES 2,700</span>
+              </div>
+              <div class="text-xs text-gray-500">1.5% of gross pay</div>
+            </div>
+          </div>
+
+          <!-- Total Deductions -->
+          <div class="bg-red-50 p-4 rounded-lg border border-red-100">
+            <div class="flex justify-between items-center">
+              <span class="font-medium text-gray-900">Total Deductions</span>
+              <span class="text-red-600 font-bold">KES 54,763</span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden p-6">
-      <h3 class="text-xl font-semibold text-gray-900 mb-4">Current Tax Brackets (2025)</h3>
-      
+    <!-- Tax Brackets -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+      <div class="border-b border-gray-100 p-4">
+        <h4 class="text-lg font-semibold text-gray-900">2025 Tax Brackets</h4>
+      </div>
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
-          <thead>
+          <thead class="bg-gray-50">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monthly Income (KES)</th>
-              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Tax Rate</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monthly Income (KES)</th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Tax Rate</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <tr>
-              <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">0 - 24,000</td>
-              <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 text-right">10%</td>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">0 - 24,000</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-green-600 font-medium">10%</td>
             </tr>
-            <tr>
-              <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">24,001 - 32,333</td>
-              <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 text-right">25%</td>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">24,001 - 32,333</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-green-600 font-medium">25%</td>
             </tr>
-            <tr>
-              <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">32,334 - 500,000</td>
-              <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 text-right">30%</td>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">32,334 - 500,000</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-green-600 font-medium">30%</td>
             </tr>
-            <tr>
-              <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">500,001 - 800,000</td>
-              <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 text-right">32.5%</td>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">500,001 - 800,000</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-green-600 font-medium">32.5%</td>
             </tr>
-            <tr>
-              <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">Above 800,000</td>
-              <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 text-right">35%</td>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Above 800,000</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-green-600 font-medium">35%</td>
             </tr>
           </tbody>
         </table>
       </div>
-
-      <div class="mt-4 text-sm text-gray-600">
-        <p>Important Notes:</p>
-        <ul class="list-disc pl-5 space-y-1 mt-2">
-          <li>Personal Relief: KES 2,400 per month (KES 28,800 annually)</li>
-          <li>SHIF and Housing Levy are now tax-deductible (effective December 2024)</li>
-          <li>New NSSF rates effective February 2025</li>
-          <li>Tax returns deadline is 9th of the following month</li>
-        </ul>
-      </div>
     </div>
-  </section>
+
+    <!-- Important Notes -->
+    <div class="bg-blue-50 rounded-xl p-6 border border-blue-100">
+      <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Important Updates for 2025
+      </h4>
+      <ul class="space-y-3 text-sm text-gray-600">
+        <li class="flex items-start">
+          <svg class="w-5 h-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+          </svg>
+          <span>Personal Relief: <span class="font-medium">KES 2,400</span> monthly (KES 28,800 annually)</span>
+        </li>
+        <li class="flex items-start">
+          <svg class="w-5 h-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+          </svg>
+          <span>SHIF and Housing Levy are now tax-deductible (effective December 2024)</span>
+        </li>
+        <li class="flex items-start">
+          <svg class="w-5 h-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+          </svg>
+          <span>New reduced NSSF rate of 2.4% effective February 2025</span>
+        </li>
+        <li class="flex items-start">
+          <svg class="w-5 h-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+          </svg>
+          <span>Monthly tax returns due by 9th of the following month</span>
+        </li>
+      </ul>
+    </div>
+  </div>
 </template>
 
 <script>
 export default {
-  name: 'TaxCalculatorExample'
-};
+  name: 'TaxCalculatorExample',
+  emits: ['startCalculation']
+}
 </script>
+
+<style scoped>
+.gradient-heading {
+  background: linear-gradient(to right, #10B981, #3B82F6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+</style>

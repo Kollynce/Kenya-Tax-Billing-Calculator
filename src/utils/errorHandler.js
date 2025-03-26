@@ -220,3 +220,35 @@ export function validateRequired(data, requiredFields) {
 
   return errors;
 }
+
+/**
+ * Validate insurance premium input
+ * @param {number} value Insurance premium amount
+ * @returns {string|null} Error message or null if valid
+ */
+export function validateInsurancePremium(value) {
+  const error = validateNumericInput(value, {
+    min: 0,
+    max: 100000, // Reasonable maximum monthly premium
+    label: 'Insurance Premium'
+  });
+  
+  if (error) return error;
+  return null;
+}
+
+/**
+ * Validate housing contribution input
+ * @param {number} value Housing contribution amount
+ * @returns {string|null} Error message or null if valid
+ */
+export function validateHousingContribution(value) {
+  const error = validateNumericInput(value, {
+    min: 0,
+    max: 50000, // Reasonable maximum monthly contribution
+    label: 'Housing Contribution'
+  });
+  
+  if (error) return error;
+  return null;
+}

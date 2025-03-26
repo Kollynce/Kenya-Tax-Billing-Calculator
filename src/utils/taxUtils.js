@@ -21,7 +21,11 @@ export const TAX_CONSTANTS = {
     { min: 800000, max: null, rate: 35 }
   ],
   NSSF_TIER_I_RATE: 0.024, // 2.4% for Tier I
-  NSSF_TIER_II_RATE: 0.024 // 2.4% for Tier II
+  NSSF_TIER_II_RATE: 0.024, // 2.4% for Tier II
+  INSURANCE_RELIEF_RATE: 0.15, // 15% of insurance premiums
+  INSURANCE_RELIEF_MAX_MONTHLY: 5000, // Max 5,000 KES monthly relief
+  HOUSING_RELIEF_RATE: 0.15, // 15% of housing contributions
+  HOUSING_RELIEF_MAX_ANNUAL: 108000 // Max 108,000 KES annual relief
 };
 
 /**
@@ -162,6 +166,30 @@ export function calculatePAYE(annualTaxableIncome, taxBrackets) {
 }
 
 /**
+ * Calculate insurance relief from insurance premiums
+ * @param {number} monthlyPremium Monthly insurance premium
+ * @returns {number} Monthly insurance relief amount
+ */
+export function calculateInsuranceRelief(monthlyPremium) {
+  const reliefAmount = monthlyPremium * TAX_CONSTANTS.INSURANCE_RELIEF_RATE;
+  return Math.min(reliefAmount, TAX_CONSTANTS.INSURANCE_RELIEF_MAX_MONTHLY);
+}
+
+/**
+ * Calculate affordable housing relief from housing contributions
+ * @param {number} monthlyContribution Monthly housing contribution
+ * @returns {number} Monthly affordable housing relief
+ */
+export function calculateHousingRelief(monthlyContribution) {
+  const annualContribution = monthlyContribution * 12;
+  const annualRelief = Math.min(
+    annualContribution * TAX_CONSTANTS.HOUSING_RELIEF_RATE, 
+    TAX_CONSTANTS.HOUSING_RELIEF_MAX_ANNUAL
+  );
+  return annualRelief / 12; // Return monthly value
+}
+
+/**
  * Calculate net income and all tax components
  * @param {Object} params Calculation parameters
  * @returns {Object} Calculation results
@@ -173,7 +201,12 @@ export function calculateNetIncome({
   includeHousingLevy = true,
   taxRates,
   nssfTiers = { includeTierI: true, includeTierII: true },
-  personalRelief = TAX_CONSTANTS.PERSONAL_RELIEF
+  personalRelief = TAX_CONSTANTS.PERSONAL_RELIEF,
+  includePersonalRelief = true,
+  insurancePremium = 0,
+  includeInsuranceRelief = false,
+  housingContribution = 0,
+  includeHousingRelief = false
 }) {
   const monthlyIncome = annualIncome / 12;
   
@@ -183,18 +216,24 @@ export function calculateNetIncome({
   const monthlySHIF = includeSHIF ? calculateSHIFContribution(monthlyIncome) : 0;
   const monthlyHousingLevy = includeHousingLevy ? calculateHousingLevy(monthlyIncome) : 0;
   
+  // Calculate reliefs
+  const monthlyPersonalRelief = includePersonalRelief ? personalRelief / 12 : 0;
+  const monthlyInsuranceRelief = includeInsuranceRelief ? calculateInsuranceRelief(Number(insurancePremium)) : 0;
+  const monthlyHousingRelief = includeHousingRelief ? calculateHousingRelief(Number(housingContribution)) : 0;
+  const totalMonthlyRelief = monthlyPersonalRelief + monthlyInsuranceRelief + monthlyHousingRelief;
+  
   // Calculate annual values
   const annualNSSF = monthlyNSSF * 12;
   const annualSHIF = monthlySHIF * 12;
   const annualHousingLevy = monthlyHousingLevy * 12;
+  const annualTotalRelief = totalMonthlyRelief * 12;
   
-  // Calculate taxable income (deducting SHIF and Housing Levy as reliefs)
-  const taxableIncome = annualIncome - (includeNSSF ? annualNSSF : 0) - 
-    (includeSHIF ? annualSHIF : 0) - (includeHousingLevy ? annualHousingLevy : 0);
+  // Calculate taxable income (deducting pension contributions as reliefs)
+  const taxableIncome = annualIncome - (includeNSSF ? annualNSSF : 0);
   
   // Calculate PAYE
   const incomeTax = calculatePAYE(taxableIncome, taxRates.brackets);
-  const taxAfterRelief = Math.max(0, incomeTax - personalRelief);
+  const taxAfterRelief = Math.max(0, incomeTax - annualTotalRelief);
   
   // Calculate total deductions and net income
   const totalDeductions = taxAfterRelief + annualNSSF + annualSHIF + annualHousingLevy;
@@ -204,7 +243,10 @@ export function calculateNetIncome({
     grossIncome: annualIncome,
     taxableIncome,
     incomeTax,
-    personalRelief,
+    personalRelief: includePersonalRelief ? personalRelief : 0,
+    insuranceRelief: includeInsuranceRelief ? monthlyInsuranceRelief * 12 : 0,
+    housingRelief: includeHousingRelief ? monthlyHousingRelief * 12 : 0,
+    totalRelief: annualTotalRelief,
     nssfContribution: annualNSSF,
     nssfTierI: nssfDetails.tierI * 12,
     nssfTierII: nssfDetails.tierII * 12,
@@ -217,6 +259,7 @@ export function calculateNetIncome({
     monthlyNet: netIncome / 12,
     monthlyDeductions: totalDeductions / 12,
     effectiveTaxRate: totalDeductions / annualIncome,
+    payeTax: taxAfterRelief, // Adding for cleaner reference in UI
     monthlyBreakdown: {
       grossPay: monthlyIncome,
       nssf: monthlyNSSF,
@@ -226,7 +269,10 @@ export function calculateNetIncome({
       housingLevy: monthlyHousingLevy,
       taxableIncome: taxableIncome / 12,
       paye: taxAfterRelief / 12,
-      personalRelief: personalRelief / 12,
+      personalRelief: monthlyPersonalRelief,
+      insuranceRelief: monthlyInsuranceRelief,
+      housingRelief: monthlyHousingRelief,
+      totalRelief: totalMonthlyRelief,
       netPay: netIncome / 12
     }
   };
@@ -244,7 +290,12 @@ export function calculateGrossFromNet(targetNetPay, {
   includeHousingLevy = true,
   taxRates,
   nssfTiers = { includeTierI: true, includeTierII: true },
-  personalRelief = TAX_CONSTANTS.PERSONAL_RELIEF
+  personalRelief = TAX_CONSTANTS.PERSONAL_RELIEF,
+  includePersonalRelief = true,
+  includeInsuranceRelief = false,
+  insurancePremium = 0,
+  includeHousingRelief = false,
+  housingContribution = 0
 } = {}) {
   let low = targetNetPay;
   let high = targetNetPay * 3; // Initial upper bound
@@ -261,7 +312,12 @@ export function calculateGrossFromNet(targetNetPay, {
       includeHousingLevy,
       taxRates,
       nssfTiers,
-      personalRelief
+      personalRelief,
+      includePersonalRelief,
+      includeInsuranceRelief,
+      insurancePremium,
+      includeHousingRelief,
+      housingContribution
     });
 
     const testNet = result.monthlyNet;

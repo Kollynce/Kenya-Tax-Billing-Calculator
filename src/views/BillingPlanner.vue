@@ -391,6 +391,7 @@
         <div v-if="currentStep === 4" class="space-y-6">
           <h3 class="text-lg font-medium text-gray-900">Project Summary</h3>
           
+          <!-- Project Details Card -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-white rounded-lg border border-gray-200 p-4">
               <div class="space-y-4">
@@ -444,36 +445,11 @@
             </div>
           </div>
 
-          <!-- Total Calculation -->
-          <div class="bg-white rounded-lg border border-gray-200 p-4">
-            <h4 class="text-lg font-medium text-gray-900 mb-3">Project Total</h4>
-            <div class="space-y-2">
-              <div class="flex justify-between">
-                <span class="text-gray-600">Services Subtotal:</span>
-                <span class="font-medium">{{ formatCurrency(pricingCalculation.serviceSubtotal) }}</span>
-              </div>
-              
-              <div v-if="pricingCalculation.expensesTotal > 0" class="flex justify-between">
-                <span class="text-gray-600">Expenses:</span>
-                <span class="font-medium">{{ formatCurrency(pricingCalculation.expensesTotal) }}</span>
-              </div>
-              
-              <div v-if="project.isVATRegistered" class="flex justify-between">
-                <span class="text-gray-600">VAT (16%):</span>
-                <span class="font-medium">{{ formatCurrency(pricingCalculation.vat) }}</span>
-              </div>
-              
-              <div v-if="project.includeDigitalServiceTax" class="flex justify-between">
-                <span class="text-gray-600">Digital Service Tax (1.5%):</span>
-                <span class="font-medium">{{ formatCurrency(pricingCalculation.dst) }}</span>
-              </div>
-              
-              <div class="flex justify-between pt-2 border-t border-gray-300">
-                <span class="font-medium text-gray-900">Total:</span>
-                <span class="font-bold text-lg text-green-600">{{ formatCurrency(pricingCalculation.total) }}</span>
-              </div>
-            </div>
-          </div>
+          <!-- Tax Insights Section -->
+          <TaxInsights 
+            :profession="project.profession"
+            :annualIncome="pricingCalculation.serviceSubtotal * 12"
+          />
           
           <!-- Document Generation -->
           <div class="bg-white rounded-lg border border-gray-200 p-6">
@@ -540,12 +516,14 @@ import {
 } from '../services/billingService';
 import { formatCurrency } from '../utils/taxUtils';
 import BillingPlannerExample from '../components/BillingPlannerExample.vue';
+import TaxInsights from '../components/TaxInsights.vue';
 
 export default {
   name: 'BillingPlanner',
   
   components: {
-    BillingPlannerExample
+    BillingPlannerExample,
+    TaxInsights
   },
 
   setup() {

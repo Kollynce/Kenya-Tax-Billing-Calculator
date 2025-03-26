@@ -1079,3 +1079,87 @@ export const PRICING_FACTORS = {
     impact: 'Medium'
   }
 };
+
+export const PROFESSION_TAX_TIPS = {
+  designer: {
+    deductibles: [
+      'Software subscriptions (Adobe Creative Suite, Figma, etc.)',
+      'Design equipment and hardware',
+      'Online learning and skill development courses',
+      'Professional design association memberships',
+      'Home office space (proportional)',
+      'Client meeting expenses'
+    ],
+    recommendations: [
+      'Keep receipts for all design software and tools',
+      'Document client project expenses separately',
+      'Track time spent on each project for hourly billing',
+      'Consider registering for VAT if annual income exceeds threshold'
+    ]
+  },
+  writer: {
+    deductibles: [
+      'Research materials and books',
+      'Writing software subscriptions',
+      'Professional editing tools',
+      'Internet and communication costs',
+      'Writing workshops and courses',
+      'Professional memberships'
+    ],
+    recommendations: [
+      'Keep detailed records of research expenses',
+      'Track word counts for performance analysis',
+      'Consider digital service tax implications for online content',
+      'Document income from different writing platforms'
+    ]
+  },
+  musician: {
+    deductibles: [
+      'Musical instruments and equipment',
+      'Studio rental and recording costs',
+      'Music production software',
+      'Marketing and promotion expenses',
+      'Travel to performance venues',
+      'Session musician fees'
+    ],
+    recommendations: [
+      'Keep performance and recording contracts',
+      'Document equipment depreciation',
+      'Track royalty income separately',
+      'Maintain inventory of instruments and gear'
+    ]
+  },
+  photographer: {
+    deductibles: [
+      'Camera equipment and accessories',
+      'Editing software subscriptions',
+      'Studio rental costs',
+      'Photo printing expenses',
+      'Portfolio website hosting',
+      'Photography insurance'
+    ],
+    recommendations: [
+      'Maintain equipment maintenance records',
+      'Track mileage for photoshoot travel',
+      'Document model release forms',
+      'Keep backup of client deliverables'
+    ]
+  },
+  // Add default tips for other professions
+  general: {
+    deductibles: [
+      'Home office expenses',
+      'Professional development',
+      'Equipment and tools',
+      'Internet and phone costs',
+      'Business insurance',
+      'Marketing expenses'
+    ],
+    recommendations: [
+      'Keep separate business and personal accounts',
+      'Track all business-related expenses',
+      'Save for tax payments quarterly',
+      'Consider professional tax advice'
+    ]
+  }
+};
