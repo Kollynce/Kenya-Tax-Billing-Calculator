@@ -10,6 +10,7 @@ const Proposal = () => import('../views/Proposal.vue');
 const Examples = () => import('../views/Examples.vue');
 const Auth = () => import('../views/Auth.vue');
 const Settings = () => import('../views/Settings.vue');
+const InvoiceCreate = () => import('../views/InvoiceCreate.vue');
 
 const routes = [
   {
@@ -58,6 +59,11 @@ const routes = [
       requiresAuth: true,
       requiresAdmin: true
     }
+  },
+  {
+    path: '/invoice/create',
+    name: 'InvoiceCreate',
+    component: InvoiceCreate
   }
 ];
 

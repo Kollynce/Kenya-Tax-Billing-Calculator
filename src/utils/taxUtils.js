@@ -12,7 +12,6 @@ export const TAX_CONSTANTS = {
   HOUSING_LEVY_RATE: 0.015, // 1.5% Housing Levy
   VAT_RATE: 0.16,
   DIGITAL_SERVICE_TAX_RATE: 0.015,
-  VAT_REGISTRATION_THRESHOLD: 5000000,
   TAX_BRACKETS: [
     { min: 0, max: 24000, rate: 10 },
     { min: 24000, max: 32333, rate: 25 },
@@ -26,6 +25,22 @@ export const TAX_CONSTANTS = {
   INSURANCE_RELIEF_MAX_MONTHLY: 5000, // Max 5,000 KES monthly relief
   HOUSING_RELIEF_RATE: 0.15, // 15% of housing contributions
   HOUSING_RELIEF_MAX_ANNUAL: 108000 // Max 108,000 KES annual relief
+};
+
+// Add billing constants for easier import across app
+export const BILLING_CONSTANTS = {
+  MINIMUM_HOURLY_RATES: {
+    designer: 2500,
+    writer: 2000,
+    musician: 2500,
+    photographer: 3000,
+    videographer: 3500,
+    'digital-artist': 2800,
+    animator: 3000,
+    'voice-artist': 2000,
+    'social-media': 2000,
+    general: 2000
+  }
 };
 
 /**

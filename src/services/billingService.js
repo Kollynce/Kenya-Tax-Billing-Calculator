@@ -72,7 +72,11 @@ export const BILLING_CONSTANTS = {
       name: 'Bank Transfer',
       instructions: 'Account Name: {NAME}\nBank: {BANK}\nAccount Number: {ACCOUNT}\nBranch Code: {BRANCH}'
     }
-  ]
+  ],
+  VAT_RATE: 0.16,
+  PORTFOLIO_PREMIUM: 0.15,
+  EXPERIENCE_MULTIPLIER: 0.1, // 10% per year up to 100%
+  VAT_THRESHOLD: 5000000 // 5M KES annual
 };
 
 /**
