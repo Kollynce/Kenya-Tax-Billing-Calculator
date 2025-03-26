@@ -257,30 +257,6 @@
                 <h3 class="text-2xl font-bold text-gray-900 gradient-heading">Market Insights</h3>
                 <p class="text-gray-600 mt-1">Understanding your market position</p>
               </div>
-              <div class="flex space-x-2">
-                <button 
-                  @click="timeRange = 'monthly'"
-                  :class="[
-                    'px-3 py-1 text-sm font-medium rounded-full transition-all',
-                    timeRange === 'monthly' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-gray-100 text-gray-600 hover:bg-green-50'
-                  ]"
-                >
-                  Monthly
-                </button>
-                <button 
-                  @click="timeRange = 'yearly'"
-                  :class="[
-                    'px-3 py-1 text-sm font-medium rounded-full transition-all',
-                    timeRange === 'yearly' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-gray-100 text-gray-600 hover:bg-green-50'
-                  ]"
-                >
-                  Yearly
-                </button>
-              </div>
             </div>
 
             <!-- Market Position Overview -->

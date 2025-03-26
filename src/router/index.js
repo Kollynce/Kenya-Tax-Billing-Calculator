@@ -56,8 +56,7 @@ const routes = [
     name: 'Settings',
     component: Settings,
     meta: {
-      requiresAuth: true,
-      requiresAdmin: true
+      requiresAuth: true
     }
   },
   {
@@ -76,7 +75,6 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
   const requiresGuest = to.matched.some(record => record.meta.requiresGuest);
-  const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin);
 
   // Wait for Firebase Auth to initialize
   const user = await new Promise((resolve) => {
@@ -87,13 +85,10 @@ router.beforeEach(async (to, from, next) => {
   });
 
   const isAuthenticated = !!user;
-  const isAdmin = isAuthenticated && user?.email?.toLowerCase() === process.env.VUE_APP_ADMIN_EMAIL?.toLowerCase();
 
   if (requiresAuth && !isAuthenticated) {
     next('/auth');
   } else if (requiresGuest && isAuthenticated) {
-    next('/');
-  } else if (requiresAdmin && !isAdmin) {
     next('/');
   } else {
     next();

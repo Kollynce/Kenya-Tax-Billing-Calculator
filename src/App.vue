@@ -34,7 +34,6 @@
                 Billing Planner
               </router-link>
               <router-link
-                v-if="isAdmin"
                 to="/settings"
                 class="nav-link"
                 active-class="active-nav-link"
@@ -133,7 +132,6 @@
             Billing Planner
           </router-link>
           <router-link
-            v-if="isAdmin"
             to="/settings"
             class="mobile-nav-link"
             active-class="mobile-nav-link-active"

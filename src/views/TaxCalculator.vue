@@ -330,30 +330,64 @@
           <!-- Actual Results Section -->
           <div v-else class="space-y-6">
             <div class="border-t border-gray-200 pt-6">
-              <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-                Tax Summary
-              </h2>
+              <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                  <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                  Tax Summary
+                </h2>
+                
+                <!-- Summary View Toggle -->
+                <div class="flex items-center bg-gray-100 rounded-lg p-1">
+                  <button 
+                    @click="summaryViewMode = 'monthly'" 
+                    :class="[
+                      'px-3 py-1 text-sm font-medium rounded-md transition-colors', 
+                      summaryViewMode === 'monthly' 
+                        ? 'bg-white text-green-700 shadow-sm' 
+                        : 'text-gray-600 hover:text-gray-800'
+                    ]"
+                  >
+                    Monthly
+                  </button>
+                  <button 
+                    @click="summaryViewMode = 'annual'" 
+                    :class="[
+                      'px-3 py-1 text-sm font-medium rounded-md transition-colors', 
+                      summaryViewMode === 'annual' 
+                        ? 'bg-white text-green-700 shadow-sm' 
+                        : 'text-gray-600 hover:text-gray-800'
+                    ]"
+                  >
+                    Annual
+                  </button>
+                </div>
+              </div>
 
               <!-- Summary Cards -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-gradient-to-br from-green-50 to-emerald-100 p-6 rounded-xl shadow-lg card-hover">
                   <h3 class="text-sm font-medium text-gray-600 mb-1">Gross Income</h3>
-                  <p class="text-2xl font-bold text-gray-900">{{ formatCurrency(taxSummary.grossIncome) }}</p>
-                  <p class="text-sm text-gray-500">{{ paymentPeriod === 'monthly' ? 'per month' : 'per year' }}</p>
+                  <p class="text-2xl font-bold text-gray-900">
+                    {{ formatCurrency(summaryViewMode === 'monthly' ? taxSummary.grossIncome / 12 : taxSummary.grossIncome) }}
+                  </p>
+                  <p class="text-sm text-gray-500">{{ summaryViewMode === 'monthly' ? 'per month' : 'per year' }}</p>
                 </div>
 
                 <div class="bg-gradient-to-br from-blue-50 to-indigo-100 p-6 rounded-xl shadow-lg card-hover">
                   <h3 class="text-sm font-medium text-gray-600 mb-1">Net Income</h3>
-                  <p class="text-2xl font-bold text-green-600">{{ formatCurrency(taxSummary.netIncome) }}</p>
-                  <p class="text-sm text-gray-500">{{ paymentPeriod === 'monthly' ? 'per month' : 'per year' }}</p>
+                  <p class="text-2xl font-bold text-green-600">
+                    {{ formatCurrency(summaryViewMode === 'monthly' ? taxSummary.netIncome / 12 : taxSummary.netIncome) }}
+                  </p>
+                  <p class="text-sm text-gray-500">{{ summaryViewMode === 'monthly' ? 'per month' : 'per year' }}</p>
                 </div>
 
                 <div class="bg-gradient-to-br from-red-50 to-pink-100 p-6 rounded-xl shadow-lg card-hover">
                   <h3 class="text-sm font-medium text-gray-600 mb-1">Total Deductions</h3>
-                  <p class="text-2xl font-bold text-red-600">{{ formatCurrency(taxSummary.totalDeductions) }}</p>
+                  <p class="text-2xl font-bold text-red-600">
+                    {{ formatCurrency(summaryViewMode === 'monthly' ? taxSummary.totalDeductions / 12 : taxSummary.totalDeductions) }}
+                  </p>
                   <p class="text-sm text-gray-500">{{ formatPercentage(taxSummary.totalDeductions / taxSummary.grossIncome) }} of gross</p>
                 </div>
               </div>
@@ -364,7 +398,7 @@
                   <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
-                  Deductions Breakdown
+                  Deductions Breakdown <span class="ml-2 text-sm text-gray-500">({{ summaryViewMode === 'monthly' ? 'Monthly' : 'Annual' }})</span>
                 </h3>
 
                 <div class="bg-white shadow overflow-hidden sm:rounded-lg">
@@ -373,7 +407,7 @@
                       <div class="px-4 py-3 grid grid-cols-3 gap-4 bg-gray-50">
                         <dt class="text-sm font-medium text-gray-500">PAYE Tax</dt>
                         <dd class="text-sm text-gray-900 col-span-2">
-                          {{ formatCurrency(taxSummary.payeTax) }}
+                          {{ formatCurrency(summaryViewMode === 'monthly' ? taxSummary.payeTax / 12 : taxSummary.payeTax) }}
                           <span class="text-gray-500">
                             ({{ formatPercentage(taxSummary.payeTax / taxSummary.grossIncome) }})
                           </span>
@@ -383,7 +417,7 @@
                       <div v-if="includeNSSF" class="px-4 py-3 grid grid-cols-3 gap-4">
                         <dt class="text-sm font-medium text-gray-500">NSSF Contribution</dt>
                         <dd class="text-sm text-gray-900 col-span-2">
-                          {{ formatCurrency(taxSummary.nssfContribution) }}
+                          {{ formatCurrency(summaryViewMode === 'monthly' ? taxSummary.nssfContribution / 12 : taxSummary.nssfContribution) }}
                           <span class="text-gray-500">
                             ({{ formatPercentage(taxSummary.nssfContribution / taxSummary.grossIncome) }})
                           </span>
@@ -393,21 +427,21 @@
                       <div v-if="includeNSSF && nssfTiers.includeTierI" class="px-4 py-3 grid grid-cols-3 gap-4 pl-8 bg-gray-50">
                         <dt class="text-sm font-medium text-gray-500">NSSF Tier I</dt>
                         <dd class="text-sm text-gray-900 col-span-2">
-                          {{ formatCurrency(taxSummary.nssfTierI) }}
+                          {{ formatCurrency(summaryViewMode === 'monthly' ? taxSummary.nssfTierI / 12 : taxSummary.nssfTierI) }}
                         </dd>
                       </div>
 
                       <div v-if="includeNSSF && nssfTiers.includeTierII" class="px-4 py-3 grid grid-cols-3 gap-4 pl-8">
                         <dt class="text-sm font-medium text-gray-500">NSSF Tier II</dt>
                         <dd class="text-sm text-gray-900 col-span-2">
-                          {{ formatCurrency(taxSummary.nssfTierII) }}
+                          {{ formatCurrency(summaryViewMode === 'monthly' ? taxSummary.nssfTierII / 12 : taxSummary.nssfTierII) }}
                         </dd>
                       </div>
                       
                       <div v-if="includeSHIF" class="px-4 py-3 grid grid-cols-3 gap-4 bg-gray-50">
                         <dt class="text-sm font-medium text-gray-500">SHIF Contribution</dt>
                         <dd class="text-sm text-gray-900 col-span-2">
-                          {{ formatCurrency(taxSummary.shifContribution) }}
+                          {{ formatCurrency(summaryViewMode === 'monthly' ? taxSummary.shifContribution / 12 : taxSummary.shifContribution) }}
                           <span class="text-gray-500">
                             ({{ formatPercentage(taxSummary.shifContribution / taxSummary.grossIncome) }})
                           </span>
@@ -417,7 +451,7 @@
                       <div v-if="includeHousingLevy" class="px-4 py-3 grid grid-cols-3 gap-4">
                         <dt class="text-sm font-medium text-gray-500">Housing Levy</dt>
                         <dd class="text-sm text-gray-900 col-span-2">
-                          {{ formatCurrency(taxSummary.housingLevy) }}
+                          {{ formatCurrency(summaryViewMode === 'monthly' ? taxSummary.housingLevy / 12 : taxSummary.housingLevy) }}
                           <span class="text-gray-500">
                             ({{ formatPercentage(taxSummary.housingLevy / taxSummary.grossIncome) }})
                           </span>
@@ -434,7 +468,7 @@
                   <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  Tax Relief Summary
+                  Tax Relief Summary <span class="ml-2 text-sm text-gray-500">({{ summaryViewMode === 'monthly' ? 'Monthly' : 'Annual' }})</span>
                 </h3>
 
                 <div class="bg-white shadow overflow-hidden sm:rounded-lg">
@@ -443,7 +477,7 @@
                       <div v-if="includePersonalRelief" class="px-4 py-3 grid grid-cols-3 gap-4 bg-gray-50">
                         <dt class="text-sm font-medium text-gray-500">Personal Relief</dt>
                         <dd class="text-sm text-gray-900 col-span-2">
-                          {{ formatCurrency(taxSummary.personalRelief) }}
+                          {{ formatCurrency(summaryViewMode === 'monthly' ? taxSummary.personalRelief / 12 : taxSummary.personalRelief) }}
                           <span class="text-gray-500">
                             (Standard personal relief)
                           </span>
@@ -453,9 +487,9 @@
                       <div v-if="includeInsuranceRelief" class="px-4 py-3 grid grid-cols-3 gap-4">
                         <dt class="text-sm font-medium text-gray-500">Insurance Relief</dt>
                         <dd class="text-sm text-gray-900 col-span-2">
-                          {{ formatCurrency(taxSummary.insuranceRelief) }}
+                          {{ formatCurrency(summaryViewMode === 'monthly' ? taxSummary.insuranceRelief / 12 : taxSummary.insuranceRelief) }}
                           <span class="text-gray-500">
-                            (15% of {{ formatCurrency(insurancePremium) }} monthly premium)
+                            (15% of {{ formatCurrency(summaryViewMode === 'monthly' ? insurancePremium : insurancePremium * 12) }} {{ summaryViewMode === 'monthly' ? 'monthly' : 'annual' }} premium)
                           </span>
                         </dd>
                       </div>
@@ -463,9 +497,9 @@
                       <div v-if="includeHousingRelief" class="px-4 py-3 grid grid-cols-3 gap-4 bg-gray-50">
                         <dt class="text-sm font-medium text-gray-500">Housing Relief</dt>
                         <dd class="text-sm text-gray-900 col-span-2">
-                          {{ formatCurrency(taxSummary.housingRelief) }}
+                          {{ formatCurrency(summaryViewMode === 'monthly' ? taxSummary.housingRelief / 12 : taxSummary.housingRelief) }}
                           <span class="text-gray-500">
-                            (15% of {{ formatCurrency(housingContribution) }} monthly contribution)
+                            (15% of {{ formatCurrency(summaryViewMode === 'monthly' ? housingContribution : housingContribution * 12) }} {{ summaryViewMode === 'monthly' ? 'monthly' : 'annual' }} contribution)
                           </span>
                         </dd>
                       </div>
@@ -474,7 +508,7 @@
                       <div class="px-4 py-3 grid grid-cols-3 gap-4 bg-green-50 border-t border-green-100">
                         <dt class="text-sm font-medium text-gray-700">Total Relief</dt>
                         <dd class="text-sm font-medium text-green-600 col-span-2">
-                          {{ formatCurrency(taxSummary.totalRelief) }}
+                          {{ formatCurrency(summaryViewMode === 'monthly' ? taxSummary.totalRelief / 12 : taxSummary.totalRelief) }}
                           <span class="text-gray-500">
                             ({{ formatPercentage(taxSummary.totalRelief / taxSummary.grossIncome) }} of gross)
                           </span>
@@ -485,8 +519,8 @@
                 </div>
               </div>
 
-              <!-- Monthly Breakdown -->
-              <div v-if="monthlyBreakdown" class="mt-8">
+              <!-- Monthly Breakdown - Only show in Annual view -->
+              <div v-if="summaryViewMode === 'annual' && monthlyBreakdown" class="mt-8">
                 <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
                   <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -579,7 +613,7 @@ export default {
       includeTierI: true,
       includeTierII: true
     });
-    
+
     // Tax Relief options
     const includePersonalRelief = ref(true);
     const includeInsuranceRelief = ref(false);
@@ -587,8 +621,8 @@ export default {
     const includeHousingRelief = ref(false);
     const housingContribution = ref('');
     const profession = ref('');
-
     const taxSummary = computed(() => calculation.value);
+    const summaryViewMode = ref('monthly'); // Default view mode for results
 
     const validateIncome = (value) => {
       return value > 0;
@@ -621,7 +655,7 @@ export default {
 
     const validateForm = () => {
       const newErrors = {};
-      
+
       const incomeError = validateNumericInput(Number(income.value), {
         min: 0,
         label: `${incomeType.value === 'basic' ? 'Basic' : 'Net'} ${paymentPeriod.value === 'monthly' ? 'Monthly' : 'Annual'} Income`
@@ -658,11 +692,13 @@ export default {
         
         let annualValue = Number(income.value);
         if (paymentPeriod.value === 'monthly') {
-          annualValue *= 12;
+          annualValue *= 12; // Convert monthly input to annual
         }
 
+        // If net income is provided, calculate gross
         if (incomeType.value === 'net') {
-          annualValue = calculateGrossFromNet(annualValue / 12, {
+          const annualNet = paymentPeriod.value === 'monthly' ? annualValue : annualValue;
+          annualValue = calculateGrossFromNet(annualNet / 12, {
             includeNSSF: includeNSSF.value,
             includeSHIF: includeSHIF.value,
             includeHousingLevy: includeHousingLevy.value,
@@ -672,6 +708,7 @@ export default {
           });
         }
 
+        // Calculate net income based on annual gross
         calculation.value = calculateNetIncome({
           annualIncome: annualValue,
           includeNSSF: includeNSSF.value,
@@ -750,7 +787,8 @@ export default {
       includeHousingRelief,
       housingContribution,
       taxSummary,
-      profession
+      profession,
+      summaryViewMode
     };
   }
 };
@@ -816,7 +854,6 @@ export default {
   }
 }
 
-/* Add new responsive styles */
 @media (max-width: 1024px) {
   .sticky {
     position: relative;
@@ -832,6 +869,7 @@ export default {
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.3s ease;
 }
+
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
 }
