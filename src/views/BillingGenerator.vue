@@ -17,38 +17,16 @@
     <div class="flex flex-col lg:flex-row gap-8">
       <!-- Left Column - Generator Form -->
       <div class="w-full lg:w-1/3">
-        <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 sticky top-4 space-y-6">
-          <!-- Interactive Example Card -->
-          <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg mb-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">Quick Example</h3>
-            <p class="text-sm text-gray-600 mb-3">A logo design project could be billed as:</p>
-            <div class="bg-white/70 backdrop-blur p-3 rounded-lg">
-              <div class="flex justify-between text-sm mb-2">
-                <span>Design Fee:</span>
-                <span class="font-medium">50,000 KES</span>
-              </div>
-              <div class="flex justify-between text-sm mb-2">
-                <span>Revisions (2):</span>
-                <span class="font-medium">10,000 KES</span>
-              </div>
-              <div class="flex justify-between text-sm font-medium text-green-600">
-                <span>Total:</span>
-                <span>60,000 KES</span>
-              </div>
-            </div>
-          </div>
-
+        <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 sticky top-4">
+          <!-- Form Header -->
+          <h3 class="text-xl font-bold text-gray-900 mb-4 gradient-heading">Creative Rate Calculator</h3>
+          <p class="text-sm text-gray-600 mb-6">Fill in your details to get personalized rate recommendations</p>
+          
           <!-- Form Content -->
           <form @submit.prevent="calculateTax" class="space-y-6">
-            <!-- Profession Selection with icons -->
-            <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
-              <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-                Your Profession
-              </h3>
-
+            <!-- Profession Selection -->
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Your Profession</label>
               <select
                 v-model="profession"
                 class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-600 focus:ring-green-600"
@@ -66,81 +44,98 @@
               </select>
             </div>
 
-            <div class="mt-4 space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Years Experience</label>
-                <input
-                  type="number"
-                  v-model.number="experienceYears"
-                  min="0"
-                  max="20"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-600 focus:ring-green-600"
-                />
-              </div>
-
-              <div class="space-y-2">
-                <div class="p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200 cursor-pointer border border-transparent hover:border-purple-200 relative group"
-                     @click="hasPortfolio = !hasPortfolio">
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                      <input
-                        type="checkbox"
-                        v-model="hasPortfolio"
-                        class="w-4 h-4 md:w-5 md:h-5 text-purple-600 rounded focus:ring-purple-500"
-                      />
-                      <label class="text-sm text-gray-700 font-medium cursor-pointer">Portfolio Available</label>
-                    </div>
-                    <span class="text-xs text-purple-600 font-medium">+15%</span>
-                  </div>
-                  
-                  <!-- Enhanced Portfolio tooltip -->
-                  <div class="hidden group-hover:block absolute z-20 w-72 p-4 bg-white rounded-lg shadow-xl border border-purple-100 -right-2 top-12">
-                    <div class="flex items-start space-x-3">
-                      <div class="p-2 bg-purple-50 rounded-lg">
-                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                      </div>
-                      <div>
-                        <p class="text-sm font-medium text-gray-900 mb-1">Portfolio Premium</p>
-                        <p class="text-xs text-gray-600">A well-curated portfolio showing your best work allows you to charge premium rates. This typically adds a 15% increase to your base rates.</p>
-                      </div>
-                    </div>
-                  </div>
+            <!-- Experience Years -->
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Years Experience</label>
+              <input
+                type="number"
+                v-model.number="experienceYears"
+                min="0"
+                max="20"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-600 focus:ring-green-600"
+              />
+              <p class="mt-1 text-xs text-gray-500">Experience directly impacts your recommended rates</p>
+            </div>
+            
+            <!-- Professional Options -->
+            <div class="space-y-3">
+              <h4 class="text-sm font-medium text-gray-700 mb-2">Professional Options</h4>
+              
+              <!-- Portfolio Available -->
+              <div class="p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200 border border-transparent hover:border-purple-200 flex items-center justify-between group cursor-pointer"
+                   @click="hasPortfolio = !hasPortfolio">
+                <div class="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    v-model="hasPortfolio"
+                    class="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
+                  />
+                  <span class="text-sm text-gray-700">Portfolio Available</span>
                 </div>
-
-                <div class="p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200 cursor-pointer border border-transparent hover:border-purple-200 relative group"
-                     @click="isVATRegistered = !isVATRegistered">
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                      <input
-                        type="checkbox"
-                        v-model="isVATRegistered"
-                        class="w-4 h-4 md:w-5 md:h-5 text-purple-600 rounded focus:ring-purple-500"
-                      />
-                      <label class="text-sm text-gray-700 font-medium cursor-pointer">VAT Registered</label>
-                    </div>
-                    <span class="text-xs text-purple-600 font-medium">+16%</span>
-                  </div>
-                  
-                  <!-- Enhanced VAT Registration tooltip -->
-                  <div class="hidden group-hover:block absolute z-20 w-72 p-4 bg-white rounded-lg shadow-xl border border-purple-100 -right-2 top-12">
-                    <div class="flex items-start space-x-3">
-                      <div class="p-2 bg-purple-50 rounded-lg">
-                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                      </div>
-                      <div>
-                        <p class="text-sm font-medium text-gray-900 mb-1">VAT Registration Benefits</p>
-                        <p class="text-xs text-gray-600">VAT registered businesses charge an additional 16% on invoices. This helps you work with larger clients and claim VAT on business expenses.</p>
-                        <p class="text-xs text-gray-500 mt-2">Required if your annual turnover exceeds 5M KES.</p>
-                      </div>
-                    </div>
-                  </div>
+                <span class="text-xs px-2 py-1 bg-purple-100 text-purple-600 font-medium rounded-full">+15%</span>
+                
+                <!-- Portfolio tooltip -->
+                <div class="hidden group-hover:block absolute z-20 w-64 p-3 bg-white rounded-lg shadow-lg border border-purple-100 right-0 mt-2 transform translate-y-8 -translate-x-1/3">
+                  <p class="text-xs text-gray-600">A well-curated portfolio showing your best work allows you to charge premium rates.</p>
+                </div>
+              </div>
+              
+              <!-- VAT Registered -->
+              <div class="p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200 border border-transparent hover:border-purple-200 flex items-center justify-between group cursor-pointer"
+                   @click="isVATRegistered = !isVATRegistered">
+                <div class="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    v-model="isVATRegistered"
+                    class="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
+                  />
+                  <span class="text-sm text-gray-700">VAT Registered</span>
+                </div>
+                <span class="text-xs px-2 py-1 bg-purple-100 text-purple-600 font-medium rounded-full">+16%</span>
+                
+                <!-- VAT tooltip -->
+                <div class="hidden group-hover:block absolute z-20 w-64 p-3 bg-white rounded-lg shadow-lg border border-purple-100 right-0 mt-2 transform translate-y-8 -translate-x-1/3">
+                  <p class="text-xs text-gray-600">VAT registered businesses charge an additional 16% on invoices. Required if your annual turnover exceeds 5M KES.</p>
                 </div>
               </div>
             </div>
+            
+            <!-- Quick Example Card -->
+            <div class="mt-6 p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
+              <h4 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                <svg class="w-4 h-4 mr-1 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Sample Rate Preview
+              </h4>
+              
+              <div v-if="marketRates" class="bg-white/80 backdrop-blur p-3 rounded-lg">
+                <div class="flex justify-between text-sm mb-2">
+                  <span>Standard Rate:</span>
+                  <span class="font-medium">{{ formatCurrency(marketRates.recommended) }}/hr</span>
+                </div>
+                <div class="flex justify-between text-sm mb-2" v-if="isVATRegistered">
+                  <span>With VAT (16%):</span>
+                  <span class="font-medium text-purple-600">{{ formatCurrency(marketRates.recommendedWithVAT) }}/hr</span>
+                </div>
+                <div class="flex justify-between text-sm font-medium text-green-600 pt-2 border-t border-green-100">
+                  <span>Monthly Potential:</span>
+                  <span>{{ formatCurrency(marketRates.monthly) }}</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-2 italic">Based on 160hrs/month</p>
+              </div>
+            </div>
+            
+            <!-- Create Invoice Button -->
+            <button
+              @click="createInvoice"
+              class="w-full mt-4 py-3 px-4 border border-transparent rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 flex items-center justify-center"
+            >
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Generate Professional Invoice
+            </button>
           </form>
         </div>
       </div>
@@ -160,6 +155,28 @@
               </span>
             </div>
 
+            <!-- Simple Rate Guide -->
+            <div class="mb-8 p-4 bg-gradient-to-br from-gray-50 to-purple-50 rounded-xl border border-gray-200">
+              <h4 class="text-lg font-medium text-gray-900 mb-4">Rates By Experience Level</h4>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="p-4 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all duration-300">
+                  <h5 class="text-sm font-medium text-gray-900">Beginner Rate</h5>
+                  <p class="text-xl font-bold text-green-600 mt-1">{{ formatCurrency(marketRates.beginner) }}/hr</p>
+                  <p class="text-xs text-gray-500 mt-1">0-2 years experience</p>
+                </div>
+                <div class="p-4 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all duration-300">
+                  <h5 class="text-sm font-medium text-gray-900">Intermediate Rate</h5>
+                  <p class="text-xl font-bold text-blue-600 mt-1">{{ formatCurrency(marketRates.intermediate) }}/hr</p>
+                  <p class="text-xs text-gray-500 mt-1">2-5 years experience</p>
+                </div>
+                <div class="p-4 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all duration-300">
+                  <h5 class="text-sm font-medium text-gray-900">Expert Rate</h5>
+                  <p class="text-xl font-bold text-purple-600 mt-1">{{ formatCurrency(marketRates.expert) }}/hr</p>
+                  <p class="text-xs text-gray-500 mt-1">5+ years experience</p>
+                </div>
+              </div>
+            </div>
+
             <!-- Rate Cards Grid -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <div class="bg-gradient-to-br from-green-50 to-emerald-100 p-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
@@ -173,7 +190,7 @@
               <div class="bg-gradient-to-br from-blue-50 to-indigo-100 p-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
                 <h4 class="text-sm font-medium text-gray-700 mb-2">Premium Rate</h4>
                 <p class="text-2xl font-bold text-blue-600">
-                  {{ formatCurrency(isVATRegistered ? marketRates.premiumWithVAT : marketRates.premium) }}/hr
+                  {{ formatCurrency(isVATRegistered ? (marketRates.premium * 1.16) : marketRates.premium) }}/hr
                 </p>
                 <span class="text-xs text-gray-500">For complex projects</span>
               </div>
@@ -296,8 +313,18 @@
             <!-- Interactive Rate Comparison Chart -->
             <div class="mb-8">
               <h4 class="text-lg font-medium text-gray-900 mb-4">Rate Comparison by Experience</h4>
-              <div class="h-64 relative">
-                <canvas ref="rateChart"></canvas>
+              <div class="h-64 w-full bg-white rounded-lg border border-gray-100">
+                <div v-if="!chartReady" class="h-full w-full flex items-center justify-center">
+                  <div class="animate-pulse flex flex-col items-center">
+                    <svg class="w-10 h-10 text-green-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    <span class="text-sm text-gray-500">Loading chart...</span>
+                  </div>
+                </div>
+                <div v-else class="h-full w-full p-4">
+                  <RateComparisonChart :profession-rates="chartRates" />
+                </div>
               </div>
             </div>
 
@@ -377,15 +404,15 @@
                     </div>
                     <div>
                       <h5 class="font-medium text-gray-900">Client Distribution</h5>
-                      <div class="mt-2">
+                      <div class="mt-2 grid grid-cols-2 gap-x-4 gap-y-2">
                         <div v-for="(percentage, type) in marketInsights.clientTypes" 
                              :key="type"
-                             class="mb-2">
-                          <div class="flex justify-between text-sm text-gray-600 mb-1">
+                             class="mb-1">
+                          <div class="flex justify-between text-xs text-gray-600 mb-1">
                             <span>{{ type }}</span>
                             <span>{{ percentage }}%</span>
                           </div>
-                          <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                             <div class="h-full bg-teal-500 rounded-full" :style="{ width: `${percentage}%` }"></div>
                           </div>
                         </div>
@@ -393,29 +420,10 @@
                     </div>
                   </div>
                 </div>
+
               </div>
 
-              <!-- Simple Rate Guide -->
-              <div class="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <h4 class="text-lg font-medium text-gray-900 mb-4">Simple Rate Guide</h4>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div class="p-4 bg-white rounded-lg border border-gray-200">
-                    <h5 class="text-sm font-medium text-gray-900">Beginner Rate</h5>
-                    <p class="text-xl font-bold text-green-600 mt-1">{{ formatCurrency(marketRates.beginner) }}/hr</p>
-                    <p class="text-xs text-gray-500 mt-1">0-2 years experience</p>
-                  </div>
-                  <div class="p-4 bg-white rounded-lg border border-gray-200">
-                    <h5 class="text-sm font-medium text-gray-900">Intermediate Rate</h5>
-                    <p class="text-xl font-bold text-blue-600 mt-1">{{ formatCurrency(marketRates.intermediate) }}/hr</p>
-                    <p class="text-xs text-gray-500 mt-1">2-5 years experience</p>
-                  </div>
-                  <div class="p-4 bg-white rounded-lg border border-gray-200">
-                    <h5 class="text-sm font-medium text-gray-900">Expert Rate</h5>
-                    <p class="text-xl font-bold text-purple-600 mt-1">{{ formatCurrency(marketRates.expert) }}/hr</p>
-                    <p class="text-xs text-gray-500 mt-1">5+ years experience</p>
-                  </div>
-                </div>
-              </div>
+          
             </div>
           </div>
 
@@ -499,13 +507,17 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, watch, nextTick } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { Chart } from 'chart.js/auto';
+import RateComparisonChart from '../components/RateComparisonChart.vue';
 import { formatCurrency, TAX_CONSTANTS, BILLING_CONSTANTS } from '../utils/taxUtils';
 
 export default {
   name: 'BillingGenerator',
+  
+  components: {
+    RateComparisonChart
+  },
   
   setup() {
     const router = useRouter();
@@ -515,7 +527,7 @@ export default {
     const isVATRegistered = ref(false);
     const specialization = ref('');
     const timeRange = ref('monthly');
-    const rateChartRef = ref(null);
+    const chartReady = ref(false);
 
     const marketRates = computed(() => {
       // Get base rate for the profession
@@ -532,6 +544,9 @@ export default {
       
       const recommended = baseRate * experienceMultiplier * (1 + portfolioBonus);
       const recommendedWithVAT = recommended * vatAdjustment;
+      
+      // Premium rate is 25% higher than recommended
+      const premium = recommended * 1.25;
 
       // Calculate different experience level rates
       const beginner = baseRate;
@@ -547,6 +562,7 @@ export default {
         topRate,
         recommended,
         recommendedWithVAT,
+        premium,
         marketAverage,
         monthly: recommended * 160, // Assuming 160 working hours per month
         vatRegistration: {
@@ -718,75 +734,22 @@ export default {
       });
     };
 
-    let rateChart = null;
-
-    const initRateChart = () => {
-      nextTick(async () => {
-        if (!rateChartRef.value) {
-          console.error('Chart ref not found');
-          return;
-        }
-
-        if (rateChart) {
-          rateChart.destroy();
-        }
-
-        const experienceLevels = ['0-2 yrs', '2-5 yrs', '5-8 yrs', '8+ yrs'];
-        const ctx = rateChartRef.value.getContext('2d');
-
-        const professionRates = [
-          marketRates.value.beginner,
-          marketRates.value.intermediate,
-          marketRates.value.expert,
-          marketRates.value.topRate
-        ];
-
-        try {
-          rateChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-              labels: experienceLevels,
-              datasets: [
-                {
-                  label: 'Your Rate Range',
-                  data: professionRates,
-                  borderColor: '#10B981',
-                  backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                  fill: true,
-                  tension: 0.4
-                }
-              ]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                tooltip: {
-                  callbacks: {
-                    label: (context) => {
-                      return `Rate: KES ${context.raw.toLocaleString()}`;
-                    }
-                  }
-                },
-                legend: {
-                  display: false
-                }
-              },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  ticks: {
-                    callback: (value) => `KES ${value.toLocaleString()}`
-                  }
-                }
-              }
-            }
-          });
-        } catch (err) {
-          console.error("Error initializing chart:", err);
-        }
-      });
-    };
+    // Chart data computed property
+    const chartRates = computed(() => {
+      return [
+        marketRates.value.beginner,
+        marketRates.value.intermediate,
+        marketRates.value.expert,
+        marketRates.value.topRate
+      ];
+    });
+    
+    // Initialize chart with a small delay to ensure component is mounted
+    onMounted(() => {
+      setTimeout(() => {
+        chartReady.value = true;
+      }, 300);
+    });
 
     // Simplify the market insights section by moving it to a computed property
     const marketInsights = computed(() => {
@@ -796,16 +759,9 @@ export default {
       return marketTrends[profession.value];
     });
 
+    // Watch for changes that should update chart data
     watch([profession, experienceYears, hasPortfolio, isVATRegistered], () => {
-      nextTick(() => {
-        initRateChart();
-      });
-    }, { immediate: true });
-
-    onMounted(() => {
-      nextTick(() => {
-        initRateChart();
-      });
+      // No action needed - chart will update automatically since we use computed properties
     });
 
     return {
@@ -821,10 +777,10 @@ export default {
       VAT_REGISTRATION_THRESHOLD: TAX_CONSTANTS.VAT_REGISTRATION_THRESHOLD,
       professionTaxTips,
       timeRange,
-      rateChartRef,
+      chartRates,
+      chartReady,
       marketTrends,
       getProfessionLabel,
-      initRateChart,
       marketInsights
     };
   }
@@ -866,5 +822,11 @@ export default {
 
 .bg-primary-dark {
   background-color: #15803D;
+}
+
+/* Add specific chart styles */
+canvas {
+  max-width: 100%;
+  max-height: 100%;
 }
 </style>
