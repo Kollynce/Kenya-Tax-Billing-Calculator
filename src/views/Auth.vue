@@ -177,21 +177,24 @@ export default {
       errors.value = {};
       let isValid = true;
 
-      // Email validation
+      // Email validation with better regex
       if (!form.value.email) {
         errors.value.email = 'Email is required';
         isValid = false;
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
-        errors.value.email = 'Please enter a valid email';
+      } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(form.value.email)) {
+        errors.value.email = 'Please enter a valid email address';
         isValid = false;
       }
 
-      // Password validation
+      // Password validation with stronger requirements
       if (!form.value.password) {
         errors.value.password = 'Password is required';
         isValid = false;
-      } else if (form.value.password.length < 6) {
-        errors.value.password = 'Password must be at least 6 characters';
+      } else if (form.value.password.length < 8) {
+        errors.value.password = 'Password must be at least 8 characters';
+        isValid = false;
+      } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(form.value.password)) {
+        errors.value.password = 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
         isValid = false;
       }
 
@@ -209,12 +212,19 @@ export default {
         if (!form.value.name) {
           errors.value.name = 'Name is required';
           isValid = false;
+        } else if (form.value.name.length < 2) {
+          errors.value.name = 'Name must be at least 2 characters long';
+          isValid = false;
         }
 
         // Phone validation (optional)
-        if (form.value.phone && !/^\+?[\d\s-]{10,}$/.test(form.value.phone)) {
-          errors.value.phone = 'Please enter a valid phone number';
-          isValid = false;
+        if (form.value.phone) {
+          // Allow for international format with optional country code
+          const phoneRegex = /^(\+\d{1,3}\s?)?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/;
+          if (!phoneRegex.test(form.value.phone)) {
+            errors.value.phone = 'Please enter a valid phone number';
+            isValid = false;
+          }
         }
       }
 
@@ -230,13 +240,15 @@ export default {
       try {
         if (isRegistering.value) {
           await authStore.register(form.value);
+          loading.value = false;
+          router.push('/');
         } else {
           await authStore.login(form.value);
+          loading.value = false;
+          router.push('/');
         }
-        router.push('/');
       } catch (error) {
         authError.value = error.message;
-      } finally {
         loading.value = false;
       }
     };

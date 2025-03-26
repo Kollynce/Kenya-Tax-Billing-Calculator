@@ -8,7 +8,7 @@ import {
   signInWithPopup,
   updateProfile
 } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import { createError } from '../utils/errorHandler';
 
@@ -16,7 +16,8 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
     loading: false,
-    error: null
+    error: null,
+    userProfile: null
   }),
 
   getters: {
@@ -56,28 +57,38 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true;
       this.error = null;
       try {
+        // Create the user account
         const { user } = await createUserWithEmailAndPassword(auth, email, password);
         
         // Update user profile with name
-        if (name) {
-          await updateProfile(user, {
-            displayName: name
-          });
-        }
-
-        // Store additional user data in Firestore
-        const userRef = doc(db, 'users', user.uid);
-        await setDoc(userRef, {
-          name,
-          phone,
-          email,
-          createdAt: new Date().toISOString()
+        await updateProfile(user, {
+          displayName: name
         });
 
+        // Prepare user profile data
+        const userProfile = {
+          name,
+          email,
+          phone: phone || null,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          settings: {
+            notifications: true,
+            theme: 'light'
+          }
+        };
+
+        // Store user profile in Firestore
+        const userRef = doc(db, 'users', user.uid);
+        await setDoc(userRef, userProfile);
+
+        // Update local state
+        this.userProfile = userProfile;
         this.setUser(user);
+        
         return user;
       } catch (error) {
-        const errorMessage = this.getAuthErrorMessage(error.code);
+        let errorMessage = this.getAuthErrorMessage(error.code);
         this.error = errorMessage;
         throw createError(errorMessage, error.code);
       } finally {
@@ -126,20 +137,24 @@ export const useAuthStore = defineStore('auth', {
     },
 
     getAuthErrorMessage(code) {
-      const errorMessages = {
-        'auth/email-already-in-use': 'This email is already registered',
-        'auth/invalid-email': 'Invalid email address',
-        'auth/operation-not-allowed': 'Operation not allowed',
-        'auth/weak-password': 'Password is too weak',
-        'auth/user-disabled': 'This account has been disabled',
-        'auth/user-not-found': 'Invalid email or password',
-        'auth/wrong-password': 'Invalid email or password',
-        'auth/network-request-failed': 'Network error. Please check your connection',
-        'auth/popup-closed-by-user': 'Google sign-in was cancelled',
-        'auth/unauthorized-domain': 'This domain is not authorized for Google sign-in'
-      };
-      
-      return errorMessages[code] || 'An error occurred during authentication';
+      switch (code) {
+        case 'auth/email-already-in-use':
+          return 'This email is already registered. Please try logging in or use a different email.';
+        case 'auth/invalid-email':
+          return 'Please enter a valid email address.';
+        case 'auth/operation-not-allowed':
+          return 'Email/password accounts are not enabled. Please contact support.';
+        case 'auth/weak-password':
+          return 'Please choose a stronger password. It should be at least 6 characters long.';
+        case 'auth/user-disabled':
+          return 'This account has been disabled. Please contact support.';
+        case 'auth/user-not-found':
+          return 'No account found with this email. Please register first.';
+        case 'auth/wrong-password':
+          return 'Incorrect password. Please try again.';
+        default:
+          return 'An error occurred during authentication. Please try again.';
+      }
     }
   }
 });
