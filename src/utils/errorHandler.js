@@ -226,29 +226,49 @@ export function validateRequired(data, requiredFields) {
  * @param {number} value Insurance premium amount
  * @returns {string|null} Error message or null if valid
  */
-export function validateInsurancePremium(value) {
-  const error = validateNumericInput(value, {
-    min: 0,
-    max: 100000, // Reasonable maximum monthly premium
-    label: 'Insurance Premium'
-  });
+export const validateInsurancePremium = (value) => {
+  // Handle formatted numbers or empty strings
+  if (value === '' || value === null || value === undefined) return null;
   
-  if (error) return error;
+  const numValue = typeof value === 'string' ? Number(value.replace(/,/g, '')) : Number(value);
+  
+  if (isNaN(numValue)) {
+    return 'Insurance Premium must be a number';
+  }
+  
+  if (numValue < 0) {
+    return 'Insurance Premium cannot be negative';
+  }
+  
+  if (numValue > 400000) {
+    return 'Insurance Premium cannot exceed 400,000 KES per month';
+  }
+  
   return null;
-}
+};
 
 /**
  * Validate housing contribution input
  * @param {number} value Housing contribution amount
  * @returns {string|null} Error message or null if valid
  */
-export function validateHousingContribution(value) {
-  const error = validateNumericInput(value, {
-    min: 0,
-    max: 50000, // Reasonable maximum monthly contribution
-    label: 'Housing Contribution'
-  });
+export const validateHousingContribution = (value) => {
+  // Handle formatted numbers or empty strings
+  if (value === '' || value === null || value === undefined) return null;
   
-  if (error) return error;
+  const numValue = typeof value === 'string' ? Number(value.replace(/,/g, '')) : Number(value);
+  
+  if (isNaN(numValue)) {
+    return 'Housing Contribution must be a number';
+  }
+  
+  if (numValue < 0) {
+    return 'Housing Contribution cannot be negative';
+  }
+  
+  if (numValue > 20000) {
+    return 'Housing Contribution cannot exceed 20,000 KES per month';
+  }
+  
   return null;
-}
+};

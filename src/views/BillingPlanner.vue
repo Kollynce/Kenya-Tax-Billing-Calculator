@@ -256,8 +256,8 @@ export default {
 
   setup() {
     const currentStep = ref(0);
-    const isProjectStarted = ref(false); // Changed to regular ref, initially false
-    const showTaxGuide = ref(false);
+    const isProjectStarted = ref(false);
+    const showTaxGuide = ref(true); // Changed to true so tax guide is open by default
     const profession = ref('designer'); // Add profession prop
     
     // Project data - minimal version for tax insights

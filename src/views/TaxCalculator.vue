@@ -53,10 +53,12 @@
                     id="income"
                     v-model="income"
                     :label="incomeType === 'basic' ? 'Basic Income (KES)' : 'Net Income (KES)'"
-                    type="text"
+                    type="number"
                     :error="errors.income"
                     :placeholder="paymentPeriod === 'monthly' ? '50,000' : '600,000'"
                     @input="validateIncome"
+                    :formatNumber="true"
+                    :decimalPlaces="0"
                   />
                 </div>
 
@@ -170,10 +172,12 @@
                           id="insurancePremium"
                           v-model="insurancePremium"
                           label="Monthly Premium (KES)"
-                          type="text"
+                          type="number"
                           :error="errors.insurancePremium"
                           placeholder="5,000"
                           @input="validateInsurancePremiumInput"
+                          :formatNumber="true"
+                          :decimalPlaces="0"
                         />
                         <p class="mt-1 text-xs text-gray-500">15% of premiums paid (max 5,000/month)</p>
                       </div>
@@ -190,10 +194,12 @@
                           id="housingContribution"
                           v-model="housingContribution"
                           label="Monthly Contribution (KES)"
-                          type="text"
+                          type="number"
                           :error="errors.housingContribution"
                           placeholder="9,000"
                           @input="validateHousingContributionInput"
+                          :formatNumber="true"
+                          :decimalPlaces="0"
                         />
                         <p class="mt-1 text-xs text-gray-500">15% of contribution (max 108,000/year)</p>
                       </div>
@@ -220,7 +226,7 @@
 
       <!-- Right Column - Results or Example -->
       <div class="w-full lg:w-2/3">
-        <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 sticky top-4">
+        <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 sticky top-4" id="tax-results-section">
           <!-- Toggle between Example and Results -->
           <div v-if="!taxSummary" class="space-y-6 mb-6">
             <div class="flex items-center justify-between mb-6">
@@ -569,7 +575,7 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useAuthStore } from '../store/authStore';
 import {
   calculateNetIncome,
@@ -629,7 +635,13 @@ export default {
     };
 
     const validateInsurancePremiumInput = (value) => {
-      const error = validateInsurancePremium(Number(value));
+      // Only validate if there's actually a value
+      if (value === '') {
+        delete errors.value.insurancePremium;
+        return true;
+      }
+      
+      const error = validateInsurancePremium(value);
       if (error) {
         errors.value = { ...errors.value, insurancePremium: error };
         return false;
@@ -639,7 +651,13 @@ export default {
     };
 
     const validateHousingContributionInput = (value) => {
-      const error = validateHousingContribution(Number(value));
+      // Only validate if there's actually a value
+      if (value === '') {
+        delete errors.value.housingContribution;
+        return true;
+      }
+      
+      const error = validateHousingContribution(value);
       if (error) {
         errors.value = { ...errors.value, housingContribution: error };
         return false;
@@ -723,6 +741,17 @@ export default {
           includeHousingRelief: includeHousingRelief.value,
           housingContribution: housingContribution.value
         });
+
+        // Scroll to results section after calculation completes
+        setTimeout(() => {
+          const resultsSection = document.getElementById('tax-results-section');
+          if (resultsSection) {
+            resultsSection.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        }, 100);
       } catch (error) {
         console.error('Calculation error:', error);
       } finally {
@@ -755,6 +784,27 @@ export default {
     };
 
     const hasStartedCalculation = computed(() => income.value > 0);
+
+    // Auto-recalculate when inputs change after first calculation
+    watch([
+      income, 
+      incomeType, 
+      paymentPeriod, 
+      includeNSSF, 
+      includeSHIF,
+      includeHousingLevy,
+      nssfTiers,
+      includePersonalRelief,
+      includeInsuranceRelief,
+      insurancePremium,
+      includeHousingRelief,
+      housingContribution
+    ], async () => {
+      // Only auto-recalculate if we've already calculated once before
+      if (calculation.value) {
+        await calculateTax();
+      }
+    }, { deep: true });
 
     return {
       income,

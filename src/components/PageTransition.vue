@@ -20,14 +20,14 @@ export default {
   name: 'PageTransition',
   methods: {
     beforeEnter(el) {
-      el.style.opacity = 0;
-      el.style.transform = 'translateY(10px)';
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(25px)';
     },
     enter(el, done) {
       setTimeout(() => {
-        el.style.opacity = 1;
+        el.style.opacity = '1';
         el.style.transform = 'translateY(0)';
-        el.style.transition = 'all 0.3s ease-in-out';
+        el.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
         done();
       }, 50);
     },
@@ -38,14 +38,14 @@ export default {
       el.style.transition = '';
     },
     beforeLeave(el) {
-      el.style.opacity = 1;
+      el.style.opacity = '1';
       el.style.transform = 'translateY(0)';
     },
     leave(el, done) {
       setTimeout(() => {
-        el.style.opacity = 0;
-        el.style.transform = 'translateY(-10px)';
-        el.style.transition = 'all 0.2s ease-in-out';
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(-25px)';
+        el.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
         done();
       }, 50);
     },
@@ -62,6 +62,17 @@ export default {
 <style scoped>
 .page-enter-active,
 .page-leave-active {
-  transition: opacity 0.3s, transform 0.3s;
+  will-change: opacity, transform;
+  transition: opacity 0.4s, transform 0.4s;
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(25px);
+}
+
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-25px);
 }
 </style>

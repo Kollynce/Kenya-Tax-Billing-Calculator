@@ -18,17 +18,17 @@
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:border-green-200 transition-all duration-200">
         <div class="text-sm text-gray-500 mb-1">Monthly Gross</div>
-        <div class="text-2xl font-bold text-gray-900">KES 180,000</div>
-        <div class="text-xs text-gray-500 mt-1">Annual: KES 2,160,000</div>
+        <div class="text-2xl font-bold text-gray-900">KES 100,000</div>
+        <div class="text-xs text-gray-500 mt-1">Annual: KES 1,200,000</div>
       </div>
       <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:border-green-200 transition-all duration-200">
         <div class="text-sm text-gray-500 mb-1">Take Home Pay</div>
-        <div class="text-2xl font-bold text-green-600">KES 125,237</div>
+        <div class="text-2xl font-bold text-green-600">KES 71,580</div>
         <div class="text-xs text-gray-500 mt-1">After all deductions</div>
       </div>
       <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:border-green-200 transition-all duration-200">
         <div class="text-sm text-gray-500 mb-1">Effective Tax Rate</div>
-        <div class="text-2xl font-bold text-blue-600">30.42%</div>
+        <div class="text-2xl font-bold text-blue-600">28.42%</div>
         <div class="text-xs text-gray-500 mt-1">Including all deductions</div>
       </div>
     </div>
@@ -44,7 +44,7 @@
           <div class="bg-gray-50 p-4 rounded-lg">
             <div class="flex justify-between items-center mb-2">
               <span class="font-medium text-gray-700">PAYE Tax</span>
-              <span class="text-red-600 font-medium">KES 45,193</span>
+              <span class="text-red-600 font-medium">KES 22,400</span>
             </div>
             <div class="text-xs text-gray-500">After personal relief of KES 2,400</div>
           </div>
@@ -54,21 +54,21 @@
             <div class="bg-gray-50 p-4 rounded-lg">
               <div class="flex justify-between items-center mb-1">
                 <span class="font-medium text-gray-700">NSSF</span>
-                <span class="text-red-600 font-medium">KES 4,320</span>
+                <span class="text-red-600 font-medium">KES 2,400</span>
               </div>
               <div class="text-xs text-gray-500">2.4% of gross pay</div>
             </div>
             <div class="bg-gray-50 p-4 rounded-lg">
               <div class="flex justify-between items-center mb-1">
                 <span class="font-medium text-gray-700">SHIF</span>
-                <span class="text-red-600 font-medium">KES 4,950</span>
+                <span class="text-red-600 font-medium">KES 2,750</span>
               </div>
               <div class="text-xs text-gray-500">2.75% of gross pay</div>
             </div>
             <div class="bg-gray-50 p-4 rounded-lg">
               <div class="flex justify-between items-center mb-1">
                 <span class="font-medium text-gray-700">Housing Levy</span>
-                <span class="text-red-600 font-medium">KES 2,700</span>
+                <span class="text-red-600 font-medium">KES 1,500</span>
               </div>
               <div class="text-xs text-gray-500">1.5% of gross pay</div>
             </div>
@@ -78,7 +78,7 @@
           <div class="bg-red-50 p-4 rounded-lg border border-red-100">
             <div class="flex justify-between items-center">
               <span class="font-medium text-gray-900">Total Deductions</span>
-              <span class="text-red-600 font-bold">KES 54,763</span>
+              <span class="text-red-600 font-bold">KES 28,420</span>
             </div>
           </div>
         </div>

@@ -11,6 +11,8 @@ const Examples = () => import('../views/Examples.vue');
 const Auth = () => import('../views/Auth.vue');
 const Settings = () => import('../views/Settings.vue');
 const InvoiceCreate = () => import('../views/InvoiceCreate.vue');
+const TaxGuide = () => import('../views/TaxGuide.vue');
+const BlogPage = () => import('../views/Blog.vue');
 
 const routes = [
   {
@@ -63,12 +65,26 @@ const routes = [
     path: '/invoice/create',
     name: 'InvoiceCreate',
     component: InvoiceCreate
+  },
+  {
+    path: '/tax-guide',
+    name: 'TaxGuide',
+    component: TaxGuide
+  },
+  {
+    path: '/blog',
+    name: 'Blog',
+    component: BlogPage
   }
 ];
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
-  routes
+  routes,
+  scrollBehavior() {
+    // Always scroll to top
+    return { top: 0 }
+  }
 });
 
 // Navigation guard
