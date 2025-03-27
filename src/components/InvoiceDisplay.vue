@@ -1,14 +1,18 @@
 <template>
-  <div ref="invoiceContainer" class="bg-white p-8 shadow-lg max-w-4xl mx-auto">
+  <div ref="invoiceContainer" :class="['bg-white p-8 shadow-lg max-w-4xl mx-auto', themeClasses]">
     <!-- Invoice Header -->
     <div class="flex justify-between items-start mb-8">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">{{ invoice.title }}</h1>
-        <p class="text-gray-600">{{ invoice.invoiceNumber }}</p>
+      <div class="flex items-center">
+        <img v-if="logo" :src="logo" alt="Business Logo" class="h-16 mr-4 object-contain" />
+        <div>
+          <h1 class="text-2xl font-bold" :class="textColorClass">{{ invoice.title || 'Professional Invoice' }}</h1>
+          <p class="text-gray-600">{{ invoice.invoiceNumber }}</p>
+        </div>
       </div>
       <div class="text-right">
         <p class="text-gray-600">Date: {{ formatDate(invoice.date) }}</p>
         <p class="text-gray-600">Due Date: {{ formatDate(invoice.dueDate) }}</p>
+        <p v-if="invoice.reference" class="text-gray-600 mt-2">Ref: {{ invoice.reference }}</p>
       </div>
     </div>
 
@@ -16,7 +20,7 @@
     <div class="grid grid-cols-2 gap-8 mb-8">
       <!-- From section -->
       <div>
-        <h2 class="text-gray-700 font-semibold mb-2">From:</h2>
+        <h2 class="font-semibold mb-2" :class="sectionTitleClass">From:</h2>
         <div class="text-gray-600">
           <p class="font-medium">{{ invoice.from.name }}</p>
           <p>{{ invoice.from.address }}</p>
@@ -28,7 +32,7 @@
 
       <!-- To section -->
       <div>
-        <h2 class="text-gray-700 font-semibold mb-2">To:</h2>
+        <h2 class="font-semibold mb-2" :class="sectionTitleClass">To:</h2>
         <div class="text-gray-600">
           <p class="font-medium">{{ invoice.client.name }}</p>
           <p>{{ invoice.client.address }}</p>
@@ -41,11 +45,11 @@
     <!-- Items Table -->
     <table class="w-full mb-8">
       <thead>
-        <tr class="border-b-2 border-gray-300 text-left">
-          <th class="py-2 px-2 text-gray-700">Description</th>
-          <th class="py-2 px-2 text-gray-700 text-right">Quantity</th>
-          <th class="py-2 px-2 text-gray-700 text-right">Rate</th>
-          <th class="py-2 px-2 text-gray-700 text-right">Amount</th>
+        <tr :class="['border-b-2 border-gray-300 text-left', tableHeaderBgClass]">
+          <th class="py-2 px-2">Description</th>
+          <th class="py-2 px-2 text-right">Quantity</th>
+          <th class="py-2 px-2 text-right">Rate</th>
+          <th class="py-2 px-2 text-right">Amount</th>
         </tr>
       </thead>
       <tbody>
@@ -75,29 +79,34 @@
         </div>
         <div class="flex justify-between py-2 font-semibold border-t border-gray-300">
           <span>Total:</span>
-          <span>{{ formatCurrency(totals.total) }}</span>
+          <span :class="textColorClass">{{ formatCurrency(totals.total) }}</span>
         </div>
       </div>
     </div>
 
     <!-- Notes -->
     <div v-if="templateContent.notes" class="mb-8">
-      <h3 class="text-gray-700 font-semibold mb-2">Notes:</h3>
+      <h3 class="font-semibold mb-2" :class="sectionTitleClass">Notes:</h3>
       <p class="text-gray-600 whitespace-pre-line">{{ templateContent.notes }}</p>
     </div>
 
     <!-- Payment Information -->
-    <div v-if="invoice.paymentInfo" class="mb-8">
-      <h3 class="text-gray-700 font-semibold mb-2">Payment Information:</h3>
+    <div v-if="invoice.paymentInfo && invoice.paymentInfo.length > 0" class="mb-8">
+      <h3 class="font-semibold mb-2" :class="sectionTitleClass">Payment Information:</h3>
       <div class="text-gray-600">
         <p v-for="(line, index) in invoice.paymentInfo" :key="index">{{ line }}</p>
       </div>
     </div>
 
     <!-- Terms -->
-    <div v-if="templateContent" class="text-sm text-gray-500">
-      <h3 class="text-gray-700 font-semibold mb-2">Terms and Conditions:</h3>
+    <div v-if="templateContent.terms" class="text-sm text-gray-500">
+      <h3 class="font-semibold mb-2" :class="sectionTitleClass">Terms and Conditions:</h3>
       <p class="whitespace-pre-line">{{ templateContent.terms }}</p>
+    </div>
+    
+    <!-- Footer -->
+    <div class="mt-12 pt-4 border-t border-gray-200 text-center text-xs text-gray-400">
+      <p>{{ invoice.footer || `Thank you for your business. Invoice created with My Tax Calculator.` }}</p>
     </div>
   </div>
 </template>
@@ -144,6 +153,10 @@ export default {
     includeDigitalServiceTax: {
       type: Boolean,
       default: false
+    },
+    theme: {
+      type: String,
+      default: 'green'
     }
   },
 
@@ -204,12 +217,54 @@ Payment Terms:
         day: 'numeric'
       });
     };
+    
+    // Theme-related computed properties
+    const themeClasses = computed(() => {
+      return '';
+    });
+    
+    const textColorClass = computed(() => {
+      const colors = {
+        green: 'text-green-600',
+        blue: 'text-blue-600',
+        purple: 'text-purple-600',
+        pink: 'text-pink-600',
+        yellow: 'text-amber-600'
+      };
+      return colors[props.theme] || 'text-gray-900';
+    });
+    
+    const sectionTitleClass = computed(() => {
+      const colors = {
+        green: 'text-green-700',
+        blue: 'text-blue-700',
+        purple: 'text-purple-700',
+        pink: 'text-pink-700',
+        yellow: 'text-amber-700'
+      };
+      return colors[props.theme] || 'text-gray-700';
+    });
+    
+    const tableHeaderBgClass = computed(() => {
+      const bgColors = {
+        green: 'bg-green-50',
+        blue: 'bg-blue-50',
+        purple: 'bg-purple-50',
+        pink: 'bg-pink-50',
+        yellow: 'bg-amber-50'
+      };
+      return bgColors[props.theme] || '';
+    });
 
     return {
       totals,
       templateContent,
       formatDate,
-      formatCurrency
+      formatCurrency,
+      themeClasses,
+      textColorClass,
+      sectionTitleClass,
+      tableHeaderBgClass
     };
   }
 };
