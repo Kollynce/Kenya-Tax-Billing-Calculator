@@ -53,23 +53,31 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async register({ email, password, name, phone }) {
+    async register({ email, password, name, phone, firstName, lastName, displayName, address, city, postalCode, country, taxId, vatNumber }) {
       this.loading = true;
       this.error = null;
       try {
         // Create the user account
         const { user } = await createUserWithEmailAndPassword(auth, email, password);
         
-        // Update user profile with name
+        // Update user profile with display name
         await updateProfile(user, {
-          displayName: name
+          displayName: displayName || name // Use displayName if provided, fallback to name
         });
 
-        // Prepare user profile data
+        // Prepare user profile data with all personal information
         const userProfile = {
-          name,
+          firstName: firstName || '',
+          lastName: lastName || '',
+          displayName: displayName || name,
           email,
-          phone: phone || null,
+          phone: phone || '',
+          address: address || '',
+          city: city || '',
+          postalCode: postalCode || '',
+          country: country || 'Kenya',
+          taxId: taxId || '',
+          vatNumber: vatNumber || '',
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
           settings: {
@@ -78,7 +86,7 @@ export const useAuthStore = defineStore('auth', {
           }
         };
 
-        // Store user profile in Firestore
+        // Store complete user profile in Firestore
         const userRef = doc(db, 'users', user.uid);
         await setDoc(userRef, userProfile);
 
@@ -121,6 +129,43 @@ export const useAuthStore = defineStore('auth', {
         this.setUser(null);
       } catch (error) {
         const errorMessage = this.getAuthErrorMessage(error.code);
+        this.error = errorMessage;
+        throw createError(errorMessage, error.code);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async updateUserProfile(profileData) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const user = auth.currentUser;
+        if (!user) throw new Error('User not authenticated');
+
+        // Update display name in Firebase Auth if provided
+        if (profileData.displayName) {
+          await updateProfile(user, {
+            displayName: profileData.displayName
+          });
+        }
+
+        // Update Firestore user profile
+        const userRef = doc(db, 'users', user.uid);
+        await setDoc(userRef, {
+          ...profileData,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+
+        // Update local state
+        this.userProfile = {
+          ...this.userProfile,
+          ...profileData
+        };
+
+        return true;
+      } catch (error) {
+        const errorMessage = this.getAuthErrorMessage(error.code) || error.message;
         this.error = errorMessage;
         throw createError(errorMessage, error.code);
       } finally {

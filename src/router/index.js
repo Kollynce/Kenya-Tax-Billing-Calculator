@@ -10,6 +10,7 @@ const Proposal = () => import('../views/Proposal.vue');
 const Examples = () => import('../views/Examples.vue');
 const Auth = () => import('../views/Auth.vue');
 const Settings = () => import('../views/Settings.vue');
+const Profile = () => import('../views/Profile.vue');
 const InvoiceCreate = () => import('../views/InvoiceCreate.vue');
 const TaxGuide = () => import('../views/TaxGuide.vue');
 const BlogPage = () => import('../views/Blog.vue');
@@ -57,6 +58,14 @@ const routes = [
     path: '/settings',
     name: 'Settings',
     component: Settings,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: Profile,
     meta: {
       requiresAuth: true
     }

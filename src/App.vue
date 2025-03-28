@@ -33,20 +33,18 @@
               >
                 Billing Planner
               </router-link>
-              <router-link
-                to="/settings"
-                class="nav-link"
-                active-class="active-nav-link"
-              >
-                Settings
-              </router-link>
             </div>
           </div>
           <div class="flex items-center space-x-4">
             <!-- Auth buttons - hidden on mobile -->
             <div class="hidden sm:flex items-center space-x-4">
               <template v-if="isAuthenticated">
-                <span class="text-sm text-gray-600">{{ userEmail }}</span>
+                <router-link to="/profile" class="flex items-center group">
+                  <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium mr-2">
+                    {{ userInitials }}
+                  </div>
+                  <span class="text-sm text-gray-600 group-hover:text-green-600 transition-colors">{{ userEmail }}</span>
+                </router-link>
                 <button
                   @click="logout"
                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none transition-colors duration-200"
@@ -131,22 +129,19 @@
           >
             Billing Planner
           </router-link>
-          <router-link
-            to="/settings"
-            class="mobile-nav-link"
-            active-class="mobile-nav-link-active"
-            @click="mobileMenuOpen = false"
-          >
-            Settings
-          </router-link>
         </div>
         
         <!-- Mobile auth buttons -->
         <div class="pt-2 pb-3 border-t border-gray-200">
           <div class="flex items-center justify-center px-4 py-2">
             <template v-if="isAuthenticated">
-              <div class="flex flex-col items-center">
-                <span class="text-sm text-gray-600 mb-2">{{ userEmail }}</span>
+              <div class="flex flex-col items-center w-full">
+                <router-link to="/profile" class="flex flex-col items-center w-full mb-3">
+                  <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium mb-2">
+                    {{ userInitials }}
+                  </div>
+                  <span class="text-sm text-gray-600">{{ userEmail }}</span>
+                </router-link>
                 <button
                   @click="logout"
                   class="w-full text-center px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-full hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all duration-200"
@@ -362,6 +357,14 @@ export default {
     const loading = ref(false);
     const mobileMenuOpen = ref(false);
 
+    const userInitials = computed(() => {
+      if (userEmail.value) {
+        const parts = userEmail.value.split('@')[0].split('.');
+        return parts.map(part => part.charAt(0).toUpperCase()).join('');
+      }
+      return '';
+    });
+
     const isAdmin = computed(() => {
       return isAuthenticated.value && userEmail.value.toLowerCase() === process.env.VUE_APP_ADMIN_EMAIL?.toLowerCase();
     });
@@ -391,6 +394,7 @@ export default {
     return {
       isAuthenticated,
       userEmail,
+      userInitials,
       isAdmin,
       logout,
       loading,
