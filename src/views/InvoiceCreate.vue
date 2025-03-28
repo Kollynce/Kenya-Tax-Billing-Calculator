@@ -23,9 +23,9 @@
       <p class="text-lg text-gray-600">Generate detailed invoices that reflect your expertise</p>
     </div>
 
-    <!-- Bento Box Layout: 3 sections with adjusted height to prevent footer overlap -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-220px)] mb-6">
-      <!-- Box 1: Left Column - Input Sections (spans 5 columns) -->
+    <!-- Updated Bento Box Layout without fixed height -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+      <!-- Box 1: Left Column - Input Sections -->
       <div class="lg:col-span-5 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden flex flex-col">
         <div class="p-4 bg-gradient-to-r from-green-50 to-blue-50 border-b border-gray-100">
           <div class="flex justify-between items-center">
@@ -36,8 +36,8 @@
           </div>
         </div>
         
-        <!-- Scrollable Input Area with improved spacing -->
-        <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
+        <!-- Updated scrollable area with max height -->
+        <div class="flex-1 overflow-y-auto custom-scrollbar p-6" style="max-height: 700px;">
           <div class="space-y-8"> <!-- Added space-y-8 for better spacing between sections -->
             <BrandingSection
               v-model:invoice="invoice"
@@ -117,10 +117,10 @@
         </div>
       </div>
       
-      <!-- Right Side: Box 2 & 3 (spans 7 columns) -->
-      <div class="lg:col-span-7 flex flex-col gap-6 h-full">
+      <!-- Right Side: Box 2 & 3 -->
+      <div class="lg:col-span-7 flex flex-col gap-6">
         <!-- Box 2: Live Preview -->
-        <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden flex-1">
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
           <div class="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-100">
             <div class="flex justify-between items-center">
               <h3 class="font-medium text-gray-800">Live Preview</h3>
@@ -135,7 +135,8 @@
             </div>
           </div>
           
-          <div class="overflow-y-auto custom-scrollbar h-full p-6">
+          <!-- Updated preview area with max height -->
+          <div class="overflow-y-auto custom-scrollbar p-6" style="max-height: 500px;">
             <InvoicePreview 
               :invoice="invoice"
               :selected-theme="selectedTheme"
@@ -248,6 +249,17 @@
         </div>
       </div>
     </div>
+
+    <!-- Tax Guide Panel with proper spacing -->
+    <div class="mt-8 mb-8">
+      <TaxGuidePanel
+        :profession="profession"
+        :monthly-income="formatCurrency(calculateMonthlyIncome())"
+        :vat-amount="formatCurrency(calculateVAT())"
+        :dst-amount="formatCurrency(calculateDST())"
+        :annual-income="formatCurrency(calculateAnnualIncome())"
+      />
+    </div>
   </div>
 </template>
 
@@ -262,6 +274,7 @@ import ItemsSection from '@/components/invoice/ItemsSection.vue';
 import AdditionalSection from '@/components/invoice/AdditionalSection.vue';
 import TaxSection from '@/components/invoice/TaxSection.vue';
 import TemplatesSection from '@/components/invoice/TemplatesSection.vue';
+import TaxGuidePanel from '@/components/TaxGuidePanel.vue';
 
 export default {
   name: 'InvoiceCreate',
@@ -273,7 +286,8 @@ export default {
     ItemsSection,
     AdditionalSection,
     TaxSection,
-    TemplatesSection
+    TemplatesSection,
+    TaxGuidePanel
   },
 
   setup() {
@@ -488,6 +502,32 @@ export default {
       }, 50);
     };
 
+    // Add helper functions for tax calculations
+    const calculateMonthlyIncome = () => {
+      const totalAmount = invoice.value.items.reduce((sum, item) => {
+        return sum + (item.quantity * item.rate);
+      }, 0);
+      return totalAmount;
+    };
+
+    const calculateVAT = () => {
+      const monthlyIncome = calculateMonthlyIncome();
+      return invoice.value.includeVAT ? monthlyIncome * 0.16 : 0;
+    };
+
+    const calculateDST = () => {
+      const monthlyIncome = calculateMonthlyIncome();
+      return includeDigitalServiceTax.value ? monthlyIncome * 0.015 : 0;
+    };
+
+    const calculateAnnualIncome = () => {
+      return calculateMonthlyIncome() * 12;
+    };
+
+    const formatCurrency = (amount) => {
+      return `KES ${amount.toLocaleString('en-KE', { minimumFractionDigits: 0 })}`;
+    };
+
     return {
       invoice,
       profession,
@@ -512,6 +552,11 @@ export default {
       goBack,
       updateTemplateStyle,
       updateTemplateLayout,
+      calculateMonthlyIncome,
+      calculateVAT,
+      calculateDST,
+      calculateAnnualIncome,
+      formatCurrency,
     };
   }
 };
@@ -520,6 +565,7 @@ export default {
 <style scoped>
 .max-w-8xl {
   max-width: 88rem;
+  margin: 0 auto;
 }
 
 .gradient-heading {
@@ -588,5 +634,10 @@ export default {
   50% {
     box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
   }
+}
+
+/* Add spacing between main sections */
+.section-spacing > * + * {
+  margin-top: 2rem;
 }
 </style>

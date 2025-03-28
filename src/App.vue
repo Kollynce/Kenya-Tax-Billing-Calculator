@@ -7,30 +7,32 @@
           <div class="flex justify-between h-16">
             <div class="flex">
               <div class="flex-shrink-0 flex items-center logo">
-                <span class="logo-text">SanaaPesa</span>
+                <router-link to="/" class="flex items-center">
+                  <span class="logo-text">SanaaPesa</span>
+                </router-link>
               </div>
               <div class="hidden sm:ml-8 sm:flex sm:space-x-8">
                 <!-- Desktop navigation links -->
                 <router-link
-                  to="/tax-calculator"
+                  to="/billing-planner"
                   class="nav-link"
                   active-class="active-nav-link"
                 >
-                  Tax Calculator
+                  Project Pitch
                 </router-link>
                 <router-link
                   to="/billing"
                   class="nav-link"
                   active-class="active-nav-link"
                 >
-                  Billing Generator
+                  Send Bill
                 </router-link>
                 <router-link
-                  to="/billing-planner"
+                  to="/tax-calculator"
                   class="nav-link"
                   active-class="active-nav-link"
                 >
-                  Billing Planner
+                  Tax Helper
                 </router-link>
               </div>
             </div>
@@ -105,12 +107,12 @@
         >
           <div class="pt-2 pb-4 space-y-1">
             <router-link
-              to="/tax-calculator"
+              to="/billing-planner"
               class="mobile-nav-link"
               active-class="mobile-nav-link-active"
               @click="mobileMenuOpen = false"
             >
-              Tax Calculator
+              Project Pitch
             </router-link>
             <router-link
               to="/billing"
@@ -118,15 +120,15 @@
               active-class="mobile-nav-link-active"
               @click="mobileMenuOpen = false"
             >
-              Billing Generator
+              Send Bill
             </router-link>
             <router-link
-              to="/billing-planner"
+              to="/tax-calculator"
               class="mobile-nav-link"
               active-class="mobile-nav-link-active"
               @click="mobileMenuOpen = false"
             >
-              Billing Planner
+              Tax Helper
             </router-link>
           </div>
           
@@ -222,18 +224,18 @@
               <h3 class="text-sm font-semibold text-white tracking-wider uppercase mb-4">Tools</h3>
               <ul class="space-y-3">
                 <li>
-                  <router-link to="/tax-calculator" class="text-gray-300 dark-hover">
-                    Tax Calculator
+                  <router-link to="/billing-planner" class="text-gray-300 dark-hover">
+                    Project Pitch
                   </router-link>
                 </li>
                 <li>
                   <router-link to="/billing" class="text-gray-300 dark-hover">
-                    Billing Generator
+                    Send Bill
                   </router-link>
                 </li>
                 <li>
-                  <router-link to="/billing-planner" class="text-gray-300 dark-hover">
-                    Billing Planner
+                  <router-link to="/tax-calculator" class="text-gray-300 dark-hover">
+                    Tax Helper
                   </router-link>
                 </li>
                 <li>
