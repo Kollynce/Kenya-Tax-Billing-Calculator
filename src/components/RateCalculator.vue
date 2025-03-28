@@ -203,7 +203,7 @@ export default {
     const hasPortfolio = ref(false);
     const isVATRegistered = ref(false);
     const showPricingFactors = ref(false);
-    const showDetailedRates = ref(false);
+    const showDetailedRates = ref(true); // Changed to true to show details by default
 
     const professionOptions = ref([
       { value: 'designer', label: 'Graphic Designer' },
