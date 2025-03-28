@@ -1,6 +1,7 @@
 {
-  "name": "my-tax-calculator",
-  "version": "0.1.0",
+  "name": "sanaapesa",
+  "version": "1.0.0",
+  "description": "SanaaPesa - Your Smart Financial Management Solution",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",

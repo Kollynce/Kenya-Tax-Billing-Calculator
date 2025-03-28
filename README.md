@@ -1,4 +1,10 @@
-# my-tax-calculator
+# SanaaPesa
+
+Your Smart Financial Management Solution
+
+## About
+
+SanaaPesa is a comprehensive financial management platform designed to help individuals and businesses in Kenya manage their taxes, billing, and financial calculations efficiently.
 
 ## Project setup
 ```

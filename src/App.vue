@@ -1,167 +1,167 @@
 <template>
   <div class="min-h-screen bg-green-50">
     <!-- Navigation -->
-    <nav class="fixed w-full bg-white/80 backdrop-blur-sm z-50 border-b border-gray-100">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex">
-            <div class="flex-shrink-0 flex items-center">
-              <router-link to="/" class="text-xl font-semibold">
-                <span class="gradient-text">KE Tax & Billing</span>
-              </router-link>
+    <header v-if="showHeader">
+      <nav class="fixed w-full bg-white/80 backdrop-blur-sm z-50 border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between h-16">
+            <div class="flex">
+              <div class="flex-shrink-0 flex items-center logo">
+                <span class="logo-text">SanaaPesa</span>
+              </div>
+              <div class="hidden sm:ml-8 sm:flex sm:space-x-8">
+                <!-- Desktop navigation links -->
+                <router-link
+                  to="/tax-calculator"
+                  class="nav-link"
+                  active-class="active-nav-link"
+                >
+                  Tax Calculator
+                </router-link>
+                <router-link
+                  to="/billing"
+                  class="nav-link"
+                  active-class="active-nav-link"
+                >
+                  Billing Generator
+                </router-link>
+                <router-link
+                  to="/billing-planner"
+                  class="nav-link"
+                  active-class="active-nav-link"
+                >
+                  Billing Planner
+                </router-link>
+              </div>
             </div>
-            <div class="hidden sm:ml-8 sm:flex sm:space-x-8">
-              <!-- Desktop navigation links -->
-              <router-link
-                to="/tax-calculator"
-                class="nav-link"
-                active-class="active-nav-link"
-              >
-                Tax Calculator
-              </router-link>
-              <router-link
-                to="/billing"
-                class="nav-link"
-                active-class="active-nav-link"
-              >
-                Billing Generator
-              </router-link>
-              <router-link
-                to="/billing-planner"
-                class="nav-link"
-                active-class="active-nav-link"
-              >
-                Billing Planner
-              </router-link>
+            <div class="flex items-center space-x-4">
+              <!-- Auth buttons - hidden on mobile -->
+              <div class="hidden sm:flex items-center space-x-4">
+                <template v-if="isAuthenticated">
+                  <router-link to="/profile" class="flex items-center group">
+                    <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium mr-2">
+                      {{ userInitials }}
+                    </div>
+                    <span class="text-sm text-gray-600 group-hover:text-green-600 transition-colors">{{ userEmail }}</span>
+                  </router-link>
+                  <button
+                    @click="logout"
+                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none transition-colors duration-200"
+                  >
+                    Logout
+                  </button>
+                </template>
+                <router-link
+                  v-else
+                  to="/auth"
+                  class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-full hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all duration-200 shadow-stripe-sm hover:shadow-stripe-md"
+                >
+                  Sign in
+                </router-link>
+              </div>
+              
+              <!-- Mobile menu button -->
+              <div class="flex items-center sm:hidden">
+                <button 
+                  @click="mobileMenuOpen = !mobileMenuOpen" 
+                  class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500"
+                  aria-expanded="false"
+                >
+                  <span class="sr-only">Open main menu</span>
+                  <!-- Icon when menu is closed -->
+                  <svg 
+                    v-if="!mobileMenuOpen" 
+                    class="block h-6 w-6" 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor" 
+                    aria-hidden="true"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                  <!-- Icon when menu is open -->
+                  <svg 
+                    v-else 
+                    class="block h-6 w-6" 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor" 
+                    aria-hidden="true"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
-          <div class="flex items-center space-x-4">
-            <!-- Auth buttons - hidden on mobile -->
-            <div class="hidden sm:flex items-center space-x-4">
+        </div>
+        
+        <!-- Mobile menu -->
+        <div 
+          v-show="mobileMenuOpen" 
+          class="sm:hidden bg-white border-b border-gray-100 transition-all duration-300 ease-in-out"
+        >
+          <div class="pt-2 pb-4 space-y-1">
+            <router-link
+              to="/tax-calculator"
+              class="mobile-nav-link"
+              active-class="mobile-nav-link-active"
+              @click="mobileMenuOpen = false"
+            >
+              Tax Calculator
+            </router-link>
+            <router-link
+              to="/billing"
+              class="mobile-nav-link"
+              active-class="mobile-nav-link-active"
+              @click="mobileMenuOpen = false"
+            >
+              Billing Generator
+            </router-link>
+            <router-link
+              to="/billing-planner"
+              class="mobile-nav-link"
+              active-class="mobile-nav-link-active"
+              @click="mobileMenuOpen = false"
+            >
+              Billing Planner
+            </router-link>
+          </div>
+          
+          <!-- Mobile auth buttons -->
+          <div class="pt-2 pb-3 border-t border-gray-200">
+            <div class="flex items-center justify-center px-4 py-2">
               <template v-if="isAuthenticated">
-                <router-link to="/profile" class="flex items-center group">
-                  <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium mr-2">
-                    {{ userInitials }}
-                  </div>
-                  <span class="text-sm text-gray-600 group-hover:text-green-600 transition-colors">{{ userEmail }}</span>
-                </router-link>
-                <button
-                  @click="logout"
-                  class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none transition-colors duration-200"
-                >
-                  Logout
-                </button>
+                <div class="flex flex-col items-center w-full">
+                  <router-link to="/profile" class="flex flex-col items-center w-full mb-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium mb-2">
+                      {{ userInitials }}
+                    </div>
+                    <span class="text-sm text-gray-600">{{ userEmail }}</span>
+                  </router-link>
+                  <button
+                    @click="logout"
+                    class="w-full text-center px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-full hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all duration-200"
+                  >
+                    Logout
+                  </button>
+                </div>
               </template>
               <router-link
                 v-else
                 to="/auth"
-                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-full hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all duration-200 shadow-stripe-sm hover:shadow-stripe-md"
+                class="w-full text-center px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-full hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all duration-200 shadow-stripe-sm hover:shadow-stripe-md"
+                @click="mobileMenuOpen = false"
               >
                 Sign in
               </router-link>
             </div>
-            
-            <!-- Mobile menu button -->
-            <div class="flex items-center sm:hidden">
-              <button 
-                @click="mobileMenuOpen = !mobileMenuOpen" 
-                class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500"
-                aria-expanded="false"
-              >
-                <span class="sr-only">Open main menu</span>
-                <!-- Icon when menu is closed -->
-                <svg 
-                  v-if="!mobileMenuOpen" 
-                  class="block h-6 w-6" 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor" 
-                  aria-hidden="true"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-                <!-- Icon when menu is open -->
-                <svg 
-                  v-else 
-                  class="block h-6 w-6" 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor" 
-                  aria-hidden="true"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
           </div>
         </div>
-      </div>
-      
-      <!-- Mobile menu -->
-      <div 
-        v-show="mobileMenuOpen" 
-        class="sm:hidden bg-white border-b border-gray-100 transition-all duration-300 ease-in-out"
-      >
-        <div class="pt-2 pb-4 space-y-1">
-          <router-link
-            to="/tax-calculator"
-            class="mobile-nav-link"
-            active-class="mobile-nav-link-active"
-            @click="mobileMenuOpen = false"
-          >
-            Tax Calculator
-          </router-link>
-          <router-link
-            to="/billing"
-            class="mobile-nav-link"
-            active-class="mobile-nav-link-active"
-            @click="mobileMenuOpen = false"
-          >
-            Billing Generator
-          </router-link>
-          <router-link
-            to="/billing-planner"
-            class="mobile-nav-link"
-            active-class="mobile-nav-link-active"
-            @click="mobileMenuOpen = false"
-          >
-            Billing Planner
-          </router-link>
-        </div>
-        
-        <!-- Mobile auth buttons -->
-        <div class="pt-2 pb-3 border-t border-gray-200">
-          <div class="flex items-center justify-center px-4 py-2">
-            <template v-if="isAuthenticated">
-              <div class="flex flex-col items-center w-full">
-                <router-link to="/profile" class="flex flex-col items-center w-full mb-3">
-                  <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium mb-2">
-                    {{ userInitials }}
-                  </div>
-                  <span class="text-sm text-gray-600">{{ userEmail }}</span>
-                </router-link>
-                <button
-                  @click="logout"
-                  class="w-full text-center px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-full hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all duration-200"
-                >
-                  Logout
-                </button>
-              </div>
-            </template>
-            <router-link
-              v-else
-              to="/auth"
-              class="w-full text-center px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-full hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all duration-200 shadow-stripe-sm hover:shadow-stripe-md"
-              @click="mobileMenuOpen = false"
-            >
-              Sign in
-            </router-link>
-          </div>
-        </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
 
     <!-- Main Content -->
     <main class="py-16 bg-green-50">
@@ -183,7 +183,7 @@
             <div class="md:col-span-1">
               <div class="flex items-center mb-4">
                 <router-link to="/" class="text-xl font-semibold">
-                  <span class="text-white">KE Tax & Billing</span>
+                  <span class="footer-logo-text">SanaaPesa</span>
                 </router-link>
               </div>
               <p class="text-gray-300 text-sm mb-6">
@@ -258,11 +258,9 @@
                     Creative Finance Blog
                   </router-link>
                 </li>
-                <li>
-                  <a href="#" class="text-gray-300 dark-hover">
-                    FAQs
-                  </a>
-                </li>
+                <a href="#" class="text-gray-300 dark-hover">
+                  FAQs
+                </a>
                 <li>
                   <a href="#" class="text-gray-300 dark-hover">
                     Community
@@ -356,6 +354,8 @@ export default {
     const router = useRouter();
     const loading = ref(false);
     const mobileMenuOpen = ref(false);
+    const showHeader = ref(true);
+    const showFooter = ref(true);
 
     const userInitials = computed(() => {
       if (userEmail.value) {
@@ -398,7 +398,9 @@ export default {
       isAdmin,
       logout,
       loading,
-      mobileMenuOpen
+      mobileMenuOpen,
+      showHeader,
+      showFooter
     };
   }
 };
@@ -432,6 +434,10 @@ export default {
 
 .footer-gradient {
   background-image: linear-gradient(to bottom, #1F2937, #111827);
+  position: relative;
+  bottom: 0;
+  width: 100%;
+  margin-top: auto;
 }
 
 @media (max-width: 640px) {
@@ -442,5 +448,62 @@ export default {
 
 .dark-hover {
   @apply hover:text-green-400 transition-colors duration-200;
+}
+
+.logo-text {
+  @apply text-4xl font-extrabold;
+  background: linear-gradient(
+    135deg,
+    #16A34A 0%,    /* green */
+    #2563EB 20%,   /* blue */
+    #8B5CF6 40%,   /* purple */
+    #EC4899 60%,   /* pink */
+    #EAB308 80%,   /* yellow */
+    #14B8A6 100%   /* teal */
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
+  animation: gradient 5s ease-in-out infinite;
+  background-size: 300% 300%;
+}
+
+.footer-logo-text {
+  @apply text-5xl font-extrabold; /* 6xl instead of 4xl */
+  background: linear-gradient(
+    135deg,
+    #16A34A 0%,    /* green */
+    #2563EB 20%,   /* blue */
+    #8B5CF6 40%,   /* purple */
+    #EC4899 60%,   /* pink */
+    #EAB308 80%,   /* yellow */
+    #14B8A6 100%   /* teal */
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
+  animation: gradient 5s ease-in-out infinite;
+  background-size: 300% 300%;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+    transform: scale(1);
+  }
+  50% {
+    background-position: 100% 50%;
+    transform: scale(1.02);
+  }
+  100% {
+    background-position: 0% 50%;
+    transform: scale(1);
+  }
 }
 </style>
