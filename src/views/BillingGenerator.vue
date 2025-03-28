@@ -240,18 +240,8 @@
             </div>
           </div>
 
-          <!-- Create Invoice -->
-          <div class="my-8">
-            <button
-              @click="createInvoice"
-              class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-500"
-            >
-              Create Professional Invoice
-            </button>
-          </div>
-
           <!-- Market Insights Section with Interactive Charts -->
-          <div class="mb-8 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+          <div class="my-8 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
             <div class="flex items-center justify-between mb-6">
               <div>
                 <h3 class="text-2xl font-bold text-gray-900 gradient-heading">Market Insights</h3>
@@ -518,18 +508,18 @@ export default {
       const portfolioBonus = hasPortfolio.value ? 0.15 : 0;
       const vatAdjustment = isVATRegistered.value ? 1.16 : 1;
       
-      const recommended = baseRate * experienceMultiplier * (1 + portfolioBonus);
-      const recommendedWithVAT = recommended * vatAdjustment;
+      const recommended = Number((baseRate * experienceMultiplier * (1 + portfolioBonus)).toFixed(2));
+      const recommendedWithVAT = Number((recommended * vatAdjustment).toFixed(2));
       
       // Premium rate is 25% higher than recommended
-      const premium = recommended * 1.25;
+      const premium = Number((recommended * 1.25).toFixed(2));
 
       // Calculate different experience level rates
-      const beginner = baseRate;
-      const intermediate = baseRate * 1.5;
-      const expert = baseRate * 2;
-      const topRate = baseRate * 2.5;
-      const marketAverage = baseRate * 1.75;
+      const beginner = Number(baseRate.toFixed(2));
+      const intermediate = Number((baseRate * 1.5).toFixed(2));
+      const expert = Number((baseRate * 2).toFixed(2));
+      const topRate = Number((baseRate * 2.5).toFixed(2));
+      const marketAverage = Number((baseRate * 1.75).toFixed(2));
 
       return {
         beginner,
@@ -540,10 +530,10 @@ export default {
         recommendedWithVAT,
         premium,
         marketAverage,
-        monthly: recommended * 160, // Assuming 160 working hours per month
+        monthly: Number((recommended * 160).toFixed(2)), // Assuming 160 working hours per month
         vatRegistration: {
           shouldRegister: (recommended * 160 * 12) >= TAX_CONSTANTS.VAT_REGISTRATION_THRESHOLD,
-          projectedAnnual: recommended * 160 * 12
+          projectedAnnual: Number((recommended * 160 * 12).toFixed(2))
         }
       };
     });
@@ -705,7 +695,16 @@ export default {
         name: 'InvoiceCreate',
         query: {
           profession: profession.value,
-          rate: marketRates.value.recommended
+          rate: marketRates.value.recommended,
+          isVATRegistered: isVATRegistered.value,
+          experienceYears: experienceYears.value,
+          hasPortfolio: hasPortfolio.value,
+          monthlyPotential: marketRates.value.monthly,
+          marketAverage: marketRates.value.marketAverage,
+          // Pass profession-specific data
+          professionLabel: getProfessionLabel(profession.value),
+          skills: marketInsights.value.skills?.join(', '),
+          clientDistribution: JSON.stringify(marketInsights.value.clientTypes)
         }
       });
     };
@@ -766,6 +765,7 @@ export default {
 <style scoped>
 .gradient-heading {
   background: linear-gradient(to right, #10B981, #3B82F6);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
