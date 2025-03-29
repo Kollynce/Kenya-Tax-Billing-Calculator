@@ -408,23 +408,69 @@ export default {
 };
 </script>
 
-<style>
+<style lang="postcss">
 .nav-link {
-  @apply inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-green-600 transition-colors duration-200;
+  display: inline-flex;
+  align-items: center;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+  padding-top: 0.25rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  color: rgb(107 114 128);
+  transition-property: color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
   border-bottom: 2px solid transparent;
 }
 
+.nav-link:hover {
+  color: rgb(22 163 74);
+}
+
 .active-nav-link {
-  @apply inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 transition-colors duration-200;
+  display: inline-flex;
+  align-items: center;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+  padding-top: 0.25rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  color: rgb(17 24 39);
+  transition-property: color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
   border-bottom: 2px solid #16A34A;
 }
 
 .mobile-nav-link {
-  @apply block pl-3 pr-4 py-3 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-green-600 transition-colors duration-200;
+  display: block;
+  padding: 0.75rem 1rem 0.75rem 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+  color: rgb(75 85 99);
+  transition-property: color, background-color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+.mobile-nav-link:hover {
+  background-color: rgb(249 250 251);
+  color: rgb(22 163 74);
 }
 
 .mobile-nav-link-active {
-  @apply block pl-3 pr-4 py-3 text-base font-medium text-green-600 bg-green-50 border-l-4 border-green-500;
+  display: block;
+  padding: 0.75rem 1rem 0.75rem 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+  color: rgb(22 163 74);
+  background-color: rgb(240 253 244);
+  border-left: 4px solid rgb(34 197 94);
 }
 
 .gradient-text {
@@ -448,24 +494,30 @@ export default {
   }
 }
 
-.dark-hover {
-  @apply hover:text-green-400 transition-colors duration-200;
+.dark-hover:hover {
+  color: rgb(74 222 128);
+  transition-property: color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
 }
 
-.logo-text {
-  @apply text-4xl font-extrabold;
-  background: linear-gradient(
+.logo-text,
+.footer-logo-text {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+  font-weight: 800;
+  background-image: linear-gradient(
     135deg,
-    #16A34A 0%,    /* green */
-    #2563EB 20%,   /* blue */
-    #8B5CF6 40%,   /* purple */
-    #EC4899 60%,   /* pink */
-    #EAB308 80%,   /* yellow */
-    #14B8A6 100%   /* teal */
+    #16A34A 0%,
+    #2563EB 20%,
+    #8B5CF6 40%,
+    #EC4899 60%,
+    #EAB308 80%,
+    #14B8A6 100%
   );
-  -webkit-background-clip: text;
   background-clip: text;
-  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+  color: transparent;
   letter-spacing: -0.5px;
   font-family: 'Segoe UI', system-ui, sans-serif;
   text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
@@ -474,24 +526,8 @@ export default {
 }
 
 .footer-logo-text {
-  @apply text-5xl font-extrabold; /* 6xl instead of 4xl */
-  background: linear-gradient(
-    135deg,
-    #16A34A 0%,    /* green */
-    #2563EB 20%,   /* blue */
-    #8B5CF6 40%,   /* purple */
-    #EC4899 60%,   /* pink */
-    #EAB308 80%,   /* yellow */
-    #14B8A6 100%   /* teal */
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  letter-spacing: -0.5px;
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
-  animation: gradient 5s ease-in-out infinite;
-  background-size: 300% 300%;
+  font-size: 3rem;
+  line-height: 1;
 }
 
 @keyframes gradient {
