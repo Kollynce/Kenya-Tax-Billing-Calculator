@@ -28,7 +28,7 @@
           <!-- Saved Items Tab -->
           <SavedItemsList
             v-if="activeTab === 'saved'"
-            :items="savedItems"
+            :items="combinedItems"
             :loading="loading"
             @view="viewItem"
             @delete="deleteItem"
@@ -88,12 +88,12 @@
 
 <script>
 // Vue and router imports
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 // Firebase imports
 import { auth, db } from '../firebase';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp, collection, query, where, onSnapshot } from 'firebase/firestore';
 
 // Component imports
 import Settings from '../views/Settings.vue';
@@ -127,10 +127,30 @@ export default {
     const userEmail = ref('');
     const userName = ref('');
     
-    // Sample data - in a real app, these would come from your database
+    // Data storage
     const savedItems = ref([]);
     const billingHistory = ref([]);
     const proposals = ref([]);
+    const unsubscribeBilling = ref(null);
+
+    // Combined items computed property for dashboard
+    const combinedItems = computed(() => {
+      const invoiceItems = billingHistory.value.map(invoice => ({
+        ...invoice,
+        type: 'invoice',
+        title: `Invoice ${invoice.invoiceNumber || ''}`,
+        date: invoice.date || new Date(),
+      }));
+      
+      const proposalItems = proposals.value.map(proposal => ({
+        ...proposal,
+        type: 'proposal',
+        title: `Proposal for ${proposal.clientName || 'Client'}`,
+        date: proposal.date || new Date(),
+      }));
+      
+      return [...savedItems.value, ...invoiceItems, ...proposalItems];
+    });
 
     // Personal information form data
     const personalInfo = ref({
@@ -183,10 +203,10 @@ export default {
           router.push('/tax-calculator');
           break;
         case 'invoice':
-          router.push('/billing');
+          viewInvoice(item);
           break;
         case 'proposal':
-          router.push('/proposal');
+          viewProposal(item);
           break;
         default:
           console.log('Viewing item:', item);
@@ -207,7 +227,17 @@ export default {
     };
 
     const viewInvoice = (invoice) => {
-      router.push('/billing');
+      if (invoice.status === 'draft') {
+        router.push({
+          name: 'InvoiceCreate',
+          query: { 
+            draftId: invoice.id,
+            edit: 'true'
+          }
+        });
+      } else {
+        router.push('/billing');
+      }
       console.log('Viewing invoice:', invoice);
     };
 
@@ -272,6 +302,96 @@ export default {
       }
     };
     
+    const fetchBillingHistory = () => {
+      if (!auth.currentUser) return;
+      
+      try {
+        // Fetch invoices
+        const invoicesQuery = query(
+          collection(db, 'invoices'),
+          where('userId', '==', auth.currentUser.uid)
+        );
+
+        // Fetch invoice drafts
+        const draftsQuery = query(
+          collection(db, 'invoiceDrafts'),
+          where('userId', '==', auth.currentUser.uid)
+        );
+
+        // Set up real-time listeners
+        const unsubscribeInvoices = onSnapshot(invoicesQuery, 
+          (snapshot) => {
+            const invoices = snapshot.docs.map(doc => ({
+              ...doc.data(),
+              id: doc.id
+            }));
+            billingHistory.value = invoices;  // Only set invoices first
+          },
+          (error) => {
+            console.error('Error fetching invoices:', error);
+          }
+        );
+
+        const unsubscribeDrafts = onSnapshot(draftsQuery, 
+          (snapshot) => {
+            const drafts = snapshot.docs.map(doc => ({
+              ...doc.data(),
+              id: doc.id,
+              status: 'draft'
+            }));
+            // Filter out any drafts that have the same invoice number as existing invoices
+            const uniqueDrafts = drafts.filter(draft => 
+              !billingHistory.value.some(invoice => 
+                invoice.invoiceNumber === draft.invoiceNumber
+              )
+            );
+            // Combine unique drafts with existing invoices
+            billingHistory.value = [...billingHistory.value, ...uniqueDrafts];
+          },
+          (error) => {
+            console.error('Error fetching drafts:', error);
+          }
+        );
+
+        // Set cleanup function
+        unsubscribeBilling.value = () => {
+          unsubscribeInvoices();
+          unsubscribeDrafts();
+        };
+      } catch (error) {
+        console.error('Error setting up billing listeners:', error);
+      }
+    };
+
+    // Fetch proposals
+    const fetchProposals = () => {
+      if (!auth.currentUser) return;
+      
+      try {
+        const proposalsQuery = query(
+          collection(db, 'proposals'),
+          where('userId', '==', auth.currentUser.uid)
+        );
+
+        const unsubscribeProposals = onSnapshot(proposalsQuery, 
+          (snapshot) => {
+            proposals.value = snapshot.docs.map(doc => ({
+              ...doc.data(),
+              id: doc.id
+            }));
+          },
+          (error) => {
+            console.error('Error fetching proposals:', error);
+          }
+        );
+
+        return unsubscribeProposals;
+      } catch (error) {
+        console.error('Error setting up proposals listener:', error);
+        return null;
+      }
+    };
+    
     const loadUserData = async () => {
       loading.value = true;
       try {
@@ -284,7 +404,7 @@ export default {
           personalInfo.value.email = user.email;
           personalInfo.value.displayName = user.displayName || '';
           
-          // Fetch user data from Firestore using v9 syntax
+          // Fetch user data from Firestore
           const userRef = doc(db, 'users', user.uid);
           const userDoc = await getDoc(userRef);
           
@@ -329,6 +449,22 @@ export default {
               };
             }
           }
+
+          // Fetch billing history and proposals
+          fetchBillingHistory();
+          const unsubscribeProposals = fetchProposals();
+          
+          // Clean up listeners when component is unmounted
+          onMounted(() => {
+            return () => {
+              if (unsubscribeBilling.value) {
+                unsubscribeBilling.value();
+              }
+              if (unsubscribeProposals) {
+                unsubscribeProposals();
+              }
+            };
+          });
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -336,6 +472,28 @@ export default {
         loading.value = false;
       }
     };
+
+    // Watch for auth state changes
+    watch(
+      () => auth.currentUser,
+      (newUser) => {
+        if (newUser) {
+          loadUserData();
+        } else {
+          // Clear data when user logs out
+          savedItems.value = [];
+          billingHistory.value = [];
+          proposals.value = [];
+          
+          // Clean up listeners
+          if (unsubscribeBilling.value) {
+            unsubscribeBilling.value();
+            unsubscribeBilling.value = null;
+          }
+        }
+      },
+      { immediate: true }
+    );
 
     onMounted(async () => {
       await loadUserData();
@@ -350,6 +508,7 @@ export default {
       savedItems,
       billingHistory,
       proposals,
+      combinedItems,
       personalInfo,
       companyInfo,
       logout,

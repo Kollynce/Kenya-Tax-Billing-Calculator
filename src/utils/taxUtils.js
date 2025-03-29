@@ -77,14 +77,17 @@ export function calculateIncomeTax(annualIncome, brackets) {
  * @param {number} amount Amount to format
  * @returns {string} Formatted currency string
  */
-export function formatCurrency(amount) {
-  return new Intl.NumberFormat('en-KE', {
-    style: 'currency',
-    currency: 'KES',
+export const formatCurrency = (amount) => {
+  // Ensure amount is a number and handle invalid inputs
+  const value = Number(amount);
+  if (isNaN(value)) return 'Ksh 0';
+  
+  // Format with Kenyan Shilling and thousands separator
+  return `Ksh ${value.toLocaleString('en-KE', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
-  }).format(amount);
-}
+  })}`;
+};
 
 /**
  * Format percentage

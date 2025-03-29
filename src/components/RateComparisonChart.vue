@@ -16,7 +16,8 @@ import {
   LineElement,
   LinearScale,
   PointElement,
-  CategoryScale
+  CategoryScale,
+  Filler
 } from 'chart.js'
 
 // Register the required components
@@ -27,7 +28,8 @@ ChartJS.register(
   LineElement,
   LinearScale,
   PointElement,
-  CategoryScale
+  CategoryScale,
+  Filler
 )
 
 export default {

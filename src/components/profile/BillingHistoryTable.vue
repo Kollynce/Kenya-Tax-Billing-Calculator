@@ -28,60 +28,62 @@
         </div>
       </div>
       
-      <table v-else class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice #</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="(invoice, index) in sortedInvoices" :key="index" class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-              {{ invoice.invoiceNumber }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ invoice.client?.name || 'Draft' }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ formatDate(invoice.date) }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-              {{ formatCurrency(calculateTotal(invoice)) }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm">
-              <span :class="getStatusClasses(invoice.status)" class="px-2 py-1 rounded-md text-xs font-medium">
-                {{ invoice.status }}
-              </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-              <template v-if="invoice.status === 'draft'">
-                <button 
-                  @click="editDraft(invoice)" 
-                  class="text-green-600 hover:text-green-900 mr-3 flex items-center"
-                >
-                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                  Edit
+      <div v-else class="overflow-x-auto" style="-webkit-overflow-scrolling: touch;">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice #</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr v-for="(invoice, index) in sortedInvoices" :key="index" class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                {{ invoice.invoiceNumber }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ invoice.client?.name || 'Draft' }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ formatDate(invoice.date) }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                {{ formatCurrency(calculateTotal(invoice)) }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
+                <span :class="getStatusClasses(invoice.status)" class="px-2 py-1 rounded-md text-xs font-medium">
+                  {{ invoice.status }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <template v-if="invoice.status === 'draft'">
+                  <button 
+                    @click="editDraft(invoice)" 
+                    class="text-green-600 hover:text-green-900 mr-3 flex items-center"
+                  >
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Edit
+                  </button>
+                </template>
+                <template v-else>
+                  <button @click="$emit('view', invoice)" class="text-green-600 hover:text-green-900 mr-3">
+                    View
+                  </button>
+                </template>
+                <button @click="$emit('download', invoice)" class="text-indigo-600 hover:text-indigo-900">
+                  Download
                 </button>
-              </template>
-              <template v-else>
-                <button @click="$emit('view', invoice)" class="text-green-600 hover:text-green-900 mr-3">
-                  View
-                </button>
-              </template>
-              <button @click="$emit('download', invoice)" class="text-indigo-600 hover:text-indigo-900">
-                Download
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>
@@ -107,16 +109,15 @@ export default {
   },
   emits: ['view', 'download'],
   
-  setup(props) {
+  setup() { // Removed unused props parameter
     const router = useRouter();
     const drafts = ref([]);
     const unsubscribe = ref(null);
     const isLoading = ref(false);
     
     const sortedInvoices = computed(() => {
-      // Combine regular invoices and drafts
-      const allInvoices = [...props.invoices, ...drafts.value];
-      return allInvoices.sort((a, b) => {
+      // Create a new array instead of mutating the original
+      return [...drafts.value].sort((a, b) => {
         const dateA = b.date ? new Date(b.date) : new Date(0);
         const dateB = a.date ? new Date(a.date) : new Date(0);
         return dateA - dateB;
@@ -133,25 +134,61 @@ export default {
           where('userId', '==', auth.currentUser.uid)
         );
 
-        // Set up real-time listener
-        unsubscribe.value = onSnapshot(draftsQuery, 
+        const invoicesQuery = query(
+          collection(db, 'invoices'),
+          where('userId', '==', auth.currentUser.uid)
+        );
+
+        // Set up real-time listeners
+        const unsubscribeInvoices = onSnapshot(invoicesQuery, 
           (snapshot) => {
-            drafts.value = snapshot.docs.map(doc => ({
+            const invoices = snapshot.docs.map(doc => ({
               ...doc.data(),
-              id: doc.id
+              id: doc.id,
+              status: doc.data().status || 'pending'
             }));
+            
+            // Get current drafts
+            const currentDrafts = drafts.value;
+            
+            // Update drafts maintaining the current drafts
+            drafts.value = [...currentDrafts, ...invoices];
+            isLoading.value = false;
+          },
+          (error) => {
+            console.error('Error fetching invoices:', error);
+            isLoading.value = false;
+          }
+        );
+
+        const unsubscribeDrafts = onSnapshot(draftsQuery, 
+          (snapshot) => {
+            const newDrafts = snapshot.docs.map(doc => ({
+              ...doc.data(),
+              id: doc.id,
+              status: 'draft'
+            }));
+            
+            // Get current invoices (non-drafts)
+            const currentInvoices = drafts.value.filter(item => item.status !== 'draft');
+            
+            // Combine drafts with existing invoices
+            drafts.value = [...newDrafts, ...currentInvoices];
             isLoading.value = false;
           },
           (error) => {
             console.error('Error fetching drafts:', error);
             isLoading.value = false;
-            if (error.code === 'permission-denied') {
-              console.log('User does not have permission to access drafts');
-            }
           }
         );
+
+        // Update cleanup function
+        unsubscribe.value = () => {
+          unsubscribeInvoices();
+          unsubscribeDrafts();
+        };
       } catch (error) {
-        console.error('Error setting up drafts listener:', error);
+        console.error('Error setting up billing listeners:', error);
         isLoading.value = false;
       }
     };
@@ -198,25 +235,31 @@ export default {
     };
 
     const calculateTotal = (invoice) => {
-      if (!invoice.items) return 0;
+      if (!invoice.items || !Array.isArray(invoice.items)) return 0;
       
+      // Calculate subtotal
       const subtotal = invoice.items.reduce((sum, item) => {
-        return sum + (item.quantity * item.rate);
+        const quantity = Number(item.quantity) || 0;
+        const rate = Number(item.rate) || 0;
+        return sum + (quantity * rate);
       }, 0);
 
       let total = subtotal;
       
-      // Add VAT if applicable
+      // Add VAT if applicable (16%)
       if (invoice.includeVAT) {
-        total += subtotal * 0.16;
+        const vatAmount = subtotal * 0.16;
+        total += vatAmount;
       }
 
-      // Add Digital Service Tax if applicable
+      // Add Digital Service Tax if applicable (1.5%)
       if (invoice.includeDigitalServiceTax) {
-        total += subtotal * 0.015;
+        const dstAmount = subtotal * 0.015;
+        total += dstAmount;
       }
 
-      return total;
+      // Round to 2 decimal places to avoid floating point issues
+      return Math.round(total * 100) / 100;
     };
 
     const getStatusClasses = (status) => {
@@ -266,3 +309,32 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  height: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 9999px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
+}
+
+table {
+  min-width: 800px; /* Ensures table has a minimum width on mobile */
+}
+</style>
