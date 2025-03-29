@@ -1,5 +1,13 @@
 <template>
   <div class="max-w-8xl mx-auto px-4 py-8">
+    <!-- Loading overlay -->
+    <div v-if="loading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white p-8 rounded-xl shadow-lg flex flex-col items-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mb-4"></div>
+        <p class="text-gray-700">Loading draft...</p>
+      </div>
+    </div>
+
     <!-- Enhanced Header Section -->
     <div class="mb-8 flex-shrink-0">
       <button 
@@ -244,8 +252,10 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from '../firebase';
 import InvoicePreview from '@/components/InvoicePreview.vue';
 import BrandingSection from '@/components/invoice/BrandingSection.vue';
 import BusinessSection from '@/components/invoice/BusinessSection.vue';
@@ -275,30 +285,8 @@ export default {
     const router = useRouter();
     const profession = route.query.profession || 'general';
 
-    // Form sections for tab navigation
-    const formSections = [
-      { id: 'branding', name: 'Branding' },
-      { id: 'business', name: 'Your Details' },
-      { id: 'client', name: 'Client' },
-      { id: 'items', name: 'Items' },
-      { id: 'additional', name: 'Additional Info' },
-      { id: 'taxes', name: 'Taxes' },
-      { id: 'templates', name: 'Templates' }
-    ];
-
-    // Track active section
-    const activeSection = ref('branding');
-    
-    // Helper method to convert strings to title case (replace filter)
-    const titleCase = (value) => {
-      if (!value) return '';
-      return value.charAt(0).toUpperCase() + value.slice(1);
-    };
-    
-    // Computed for current step index
-    const currentStepIndex = computed(() => {
-      return formSections.findIndex(section => section.id === activeSection.value);
-    });
+    // Add loading state
+    const loading = ref(false);
 
     // Invoice state with expanded functionality
     const invoice = ref({
@@ -340,6 +328,65 @@ export default {
       reference: '',
       footer: '',
       notes: route.query.hasPortfolio === 'true' ? 'Portfolio and work samples available upon request.' : ''
+    });
+
+    // Form sections for tab navigation
+    const formSections = [
+      { id: 'branding', name: 'Branding' },
+      { id: 'business', name: 'Your Details' },
+      { id: 'client', name: 'Client' },
+      { id: 'items', name: 'Items' },
+      { id: 'additional', name: 'Additional Info' },
+      { id: 'taxes', name: 'Taxes' },
+      { id: 'templates', name: 'Templates' }
+    ];
+
+    // Track active section
+    const activeSection = ref('branding');
+    
+    // Helper method to convert strings to title case
+    const titleCase = (value) => {
+      if (!value) return '';
+      return value.charAt(0).toUpperCase() + value.slice(1);
+    };
+
+    // Add function to load draft
+    const loadDraft = async () => {
+      if (!route.query.draftId || !route.query.edit) return;
+      
+      loading.value = true;
+      try {
+        const draftRef = doc(db, 'invoiceDrafts', route.query.draftId);
+        const draftSnap = await getDoc(draftRef);
+        
+        if (draftSnap.exists()) {
+          const draftData = draftSnap.data();
+          // Update all the reactive refs with draft data
+          invoice.value = {
+            ...draftData,
+            draftId: route.query.draftId
+          };
+          selectedTheme.value = draftData.theme || 'green';
+          addLogo.value = draftData.addLogo || false;
+          logoUrl.value = draftData.logoData || '';
+          includeDigitalServiceTax.value = draftData.includeDigitalServiceTax || false;
+        }
+      } catch (error) {
+        console.error('Error loading draft:', error);
+        alert('Error loading draft: ' + error.message);
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    // Initialize draft data on component mount
+    onMounted(() => {
+      loadDraft();
+    });
+    
+    // Computed for current step index
+    const currentStepIndex = computed(() => {
+      return formSections.findIndex(section => section.id === activeSection.value);
     });
 
     const isDigitalProfession = computed(() => {
@@ -411,8 +458,45 @@ export default {
     };
 
     // Action methods
-    const saveDraft = () => {
-      console.log('Saving draft...');
+    const saveDraft = async () => {
+      try {
+        if (!auth.currentUser) {
+          alert('Please sign in to save drafts');
+          router.push('/auth');
+          return;
+        }
+
+        // Create a draft object with all invoice data
+        const draftData = {
+          ...invoice.value,
+          logoData: logoUrl.value, // Save logo as base64 directly
+          theme: selectedTheme.value,
+          addLogo: addLogo.value,
+          includeDigitalServiceTax: includeDigitalServiceTax.value,
+          status: 'draft',
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          userId: auth.currentUser.uid
+        };
+
+        // Generate a unique ID for the draft if it doesn't exist
+        const draftId = invoice.value.draftId || `draft_${Date.now()}`;
+        
+        // Save to Firestore
+        const draftRef = doc(db, 'invoiceDrafts', draftId);
+        await setDoc(draftRef, draftData, { merge: true });
+
+        // Update local invoice with the draft ID
+        invoice.value = {
+          ...invoice.value,
+          draftId
+        };
+
+        alert('Draft saved successfully');
+      } catch (error) {
+        console.error('Error saving draft:', error);
+        alert('Error saving draft: ' + error.message);
+      }
     };
 
     const downloadPDF = () => {
@@ -522,7 +606,8 @@ export default {
       formSections,
       activeSection,
       currentStepIndex,
-      titleCase, // Add the titleCase method to the returned object
+      loading,
+      titleCase,
       setActiveSection,
       navigateToPrevious,
       navigateToNext,
