@@ -76,6 +76,10 @@
 </template>
 
 <script>
+import { onMounted } from 'vue';
+import { auth, db } from '../../firebase';
+import { doc, getDoc } from 'firebase/firestore';
+
 export default {
   name: 'BusinessSection',
   props: {
@@ -89,16 +93,63 @@ export default {
     }
   },
   emits: ['toggle-section', 'next-section', 'prev-section', 'update:invoice'],
-  methods: {
-    updateFromField(field, value) {
-      this.$emit('update:invoice', {
-        ...this.invoice,
+  setup(props, { emit }) {
+    const updateFromField = (field, value) => {
+      emit('update:invoice', {
+        ...props.invoice,
         from: {
-          ...this.invoice.from,
+          ...props.invoice.from,
           [field]: value
         }
       });
-    }
+    };
+
+    const loadUserBusinessDetails = async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const userRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userRef);
+        
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          if (userData.company) {
+            // Update the invoice with all available company details
+            emit('update:invoice', {
+              ...props.invoice,
+              from: {
+                name: userData.company.name || '',
+                email: userData.company.email || user.email,
+                phone: userData.company.phone || '',
+                address: userData.company.address || '',
+                city: userData.company.city || '',
+                postalCode: userData.company.postalCode || '',
+                country: userData.company.country || 'Kenya',
+                regNumber: userData.company.regNumber || '',
+                taxId: userData.company.taxId || '',
+                vatNumber: userData.company.vatNumber || '',
+                bankName: userData.company.bankName || '',
+                accountName: userData.company.accountName || '',
+                accountNumber: userData.company.accountNumber || '',
+                branchCode: userData.company.branchCode || '',
+                swiftCode: userData.company.swiftCode || ''
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error loading business details:', error);
+      }
+    };
+
+    onMounted(() => {
+      loadUserBusinessDetails();
+    });
+
+    return {
+      updateFromField
+    };
   }
 };
 </script>

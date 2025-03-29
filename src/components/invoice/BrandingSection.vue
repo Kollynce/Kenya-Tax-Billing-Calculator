@@ -20,7 +20,7 @@
           <div>
             <label class="block text-sm font-medium text-gray-700">Invoice Title</label>
             <input :value="invoice.title" @input="$emit('update:invoice', { ...invoice, title: $event.target.value })" 
-                   type="text" placeholder="Professional Invoice / Service Invoice" 
+                   type="text" placeholder="Invoice" 
                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-600 focus:ring-green-600 transition-all duration-200"/>
           </div>
           
@@ -33,7 +33,6 @@
                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-600 focus:ring-green-600 transition-all duration-200"/>
               <p class="mt-1 text-xs text-gray-500">Automatically generated</p>
             </div>
-            <!-- Color Theme removed since it's now in the Templates section -->
           </div>
           
           <div class="grid grid-cols-2 gap-4">
@@ -53,34 +52,59 @@
             </div>
           </div>
           
-          <div class="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="addLogo"
-              :checked="addLogo"
-              class="w-4 h-4 text-green-600 rounded focus:ring-green-500"
-              @change="$emit('update:addLogo', $event.target.checked)"
-            />
-            <label for="addLogo" class="text-sm text-gray-700">Include Logo</label>
-            <input
-              v-if="addLogo"
-              ref="logoUpload"
-              type="file"
-              accept="image/*"
-              class="hidden"
-              @change="onLogoUpload"
-            />
-            <button 
-              v-if="addLogo"
-              @click="$refs.logoUpload.click()"
-              type="button"
-              class="ml-2 inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200"
-            >
-              {{ logoUrl ? 'Change Logo' : 'Upload Logo' }}
-            </button>
-          </div>
-          <div v-if="addLogo && logoUrl" class="mt-2">
-            <img :src="logoUrl" alt="Logo Preview" class="h-16 object-contain" />
+          <div class="space-y-3">
+            <label class="block text-sm font-medium text-gray-700">Company Logo</label>
+            <div class="flex items-center space-x-2 mb-2">
+              <input
+                type="checkbox"
+                id="addLogo"
+                :checked="addLogo"
+                class="w-4 h-4 text-green-600 rounded focus:ring-green-500"
+                @change="$emit('update:addLogo', $event.target.checked)"
+              />
+              <label for="addLogo" class="text-sm text-gray-700">Include Logo on Invoice</label>
+            </div>
+            
+            <div v-if="addLogo" 
+                 class="relative border-2 border-dashed border-gray-300 rounded-lg p-6 transition-all duration-200"
+                 :class="{'border-green-300 bg-green-50': isDragging}"
+                 @dragenter.prevent="isDragging = true"
+                 @dragleave.prevent="isDragging = false"
+                 @dragover.prevent
+                 @drop.prevent="onDrop">
+              
+              <div v-if="!logoUrl" class="text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4-4m4-12h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <div class="mt-4 flex text-sm text-gray-600">
+                  <label for="file-upload" class="relative cursor-pointer rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none">
+                    <span>Upload a file</span>
+                    <input id="file-upload" ref="logoUpload" type="file" class="sr-only" accept="image/*" @change="onLogoUpload"/>
+                  </label>
+                  <p class="pl-1">or drag and drop</p>
+                </div>
+                <p class="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+              </div>
+              
+              <div v-else class="space-y-3">
+                <div class="relative w-full h-32 bg-white rounded-lg overflow-hidden">
+                  <img :src="logoUrl" alt="Logo Preview" class="w-full h-full object-contain"/>
+                  <button @click="removeLogo" 
+                          class="absolute top-2 right-2 p-1 bg-red-100 rounded-full text-red-600 hover:bg-red-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="flex justify-end">
+                  <button @click="$refs.logoUpload.click()" 
+                          class="text-sm text-green-600 hover:text-green-700">
+                    Change Logo
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -127,6 +151,11 @@ export default {
       required: true
     }
   },
+  data() {
+    return {
+      isDragging: false
+    }
+  },
   emits: [
     'toggle-section', 
     'next-section', 
@@ -138,12 +167,30 @@ export default {
   methods: {
     onLogoUpload(event) {
       const file = event.target.files[0];
-      if (file) {
+      this.handleFile(file);
+    },
+    onDrop(event) {
+      this.isDragging = false;
+      const file = event.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        this.handleFile(file);
+      }
+    },
+    handleFile(file) {
+      if (file && file.size <= 5 * 1024 * 1024) { // 5MB limit
         const reader = new FileReader();
         reader.onload = (e) => {
           this.$emit('logo-uploaded', e.target.result);
         };
         reader.readAsDataURL(file);
+      } else {
+        alert('Please upload an image file under 5MB');
+      }
+    },
+    removeLogo() {
+      this.$emit('logo-uploaded', '');
+      if (this.$refs.logoUpload) {
+        this.$refs.logoUpload.value = '';
       }
     }
   }

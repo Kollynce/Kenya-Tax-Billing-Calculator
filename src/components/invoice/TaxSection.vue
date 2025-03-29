@@ -45,7 +45,7 @@
             <span class="text-xs px-2 py-1 bg-indigo-100 text-indigo-600 font-medium rounded-full">For digital services</span>
           </div>
           
-          <div>
+          <div v-if="invoice.includeVAT" class="transition-all duration-300">
             <label class="block text-sm font-medium text-gray-700 mb-1">VAT Number (if registered)</label>
             <input
               :value="invoice.from.vatNumber"

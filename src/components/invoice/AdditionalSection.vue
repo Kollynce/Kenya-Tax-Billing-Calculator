@@ -64,6 +64,10 @@
 </template>
 
 <script>
+import { onMounted } from 'vue';
+import { auth, db } from '../../firebase';
+import { doc, getDoc } from 'firebase/firestore';
+
 export default {
   name: 'AdditionalSection',
   props: {
@@ -77,21 +81,67 @@ export default {
     }
   },
   emits: ['toggle-section', 'next-section', 'prev-section', 'update:invoice'],
-  methods: {
-    addPaymentInfo() {
-      const newPaymentInfo = [...this.invoice.paymentInfo, ''];
-      this.$emit('update:invoice', { ...this.invoice, paymentInfo: newPaymentInfo });
-    },
-    removePaymentInfo(index) {
-      const newPaymentInfo = [...this.invoice.paymentInfo];
+  setup(props, { emit }) {
+    const addPaymentInfo = () => {
+      const newPaymentInfo = [...props.invoice.paymentInfo, ''];
+      emit('update:invoice', { ...props.invoice, paymentInfo: newPaymentInfo });
+    };
+
+    const removePaymentInfo = (index) => {
+      const newPaymentInfo = [...props.invoice.paymentInfo];
       newPaymentInfo.splice(index, 1);
-      this.$emit('update:invoice', { ...this.invoice, paymentInfo: newPaymentInfo });
-    },
-    updatePaymentInfo(index, value) {
-      const newPaymentInfo = [...this.invoice.paymentInfo];
+      emit('update:invoice', { ...props.invoice, paymentInfo: newPaymentInfo });
+    };
+
+    const updatePaymentInfo = (index, value) => {
+      const newPaymentInfo = [...props.invoice.paymentInfo];
       newPaymentInfo[index] = value;
-      this.$emit('update:invoice', { ...this.invoice, paymentInfo: newPaymentInfo });
-    }
+      emit('update:invoice', { ...props.invoice, paymentInfo: newPaymentInfo });
+    };
+
+    const loadPaymentDetails = async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const userRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userRef);
+        
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          if (userData.company) {
+            // Prepare payment information lines
+            const paymentLines = [
+              `Bank: ${userData.company.bankName || ''}`,
+              `Account Name: ${userData.company.accountName || ''}`,
+              `Account Number: ${userData.company.accountNumber || ''}`,
+              `Branch Code: ${userData.company.branchCode || ''}`,
+              `Swift Code: ${userData.company.swiftCode || ''}`
+            ].filter(line => line.split(': ')[1]); // Only include lines with values
+
+            // Only update if we have payment information
+            if (paymentLines.length > 0) {
+              emit('update:invoice', {
+                ...props.invoice,
+                paymentInfo: paymentLines
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading payment details:', error);
+      }
+    };
+
+    onMounted(() => {
+      loadPaymentDetails();
+    });
+
+    return {
+      addPaymentInfo,
+      removePaymentInfo,
+      updatePaymentInfo
+    };
   }
 };
 </script>

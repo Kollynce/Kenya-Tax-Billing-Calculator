@@ -679,18 +679,21 @@ export default {
 
     const getProfessionLabel = (value) => {
       const labels = {
-        designer: 'Graphic/UI Designer',
-        writer: 'Content Writer',
-        musician: 'Musician/Producer',
-        photographer: 'Photographer',
-        'digital-artist': 'Digital Artist',
-        general: 'Creative Professional'
+        designer: 'Design',
+        writer: 'Writing',
+        musician: 'Music',
+        photographer: 'Photography',
+        videographer: 'Video',
+        'digital-artist': 'Digital Art',
+        animator: 'Animation',
+        'voice-artist': 'Voice',
+        'social-media': 'Social Media',
+        general: 'Creative'
       };
-      return labels[value] || value;
+      return labels[value] || 'Creative';
     };
 
     const createInvoice = () => {
-      // Store the calculated rates and navigate to invoice creation
       router.push({
         name: 'InvoiceCreate',
         query: {
@@ -701,7 +704,7 @@ export default {
           hasPortfolio: hasPortfolio.value,
           monthlyPotential: marketRates.value.monthly,
           marketAverage: marketRates.value.marketAverage,
-          // Pass profession-specific data
+          // Just pass the simple profession label without any additional text
           professionLabel: getProfessionLabel(profession.value),
           skills: marketInsights.value.skills?.join(', '),
           clientDistribution: JSON.stringify(marketInsights.value.clientTypes)

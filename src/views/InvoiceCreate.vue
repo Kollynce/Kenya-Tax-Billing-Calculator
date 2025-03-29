@@ -26,7 +26,7 @@
     <!-- Updated Bento Box Layout without fixed height -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
       <!-- Box 1: Left Column - Input Sections -->
-      <div class="lg:col-span-5 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden flex flex-col">
+      <div class="lg:col-span-5 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden flex flex-col" style="max-height: 900px;">
         <div class="p-4 bg-gradient-to-r from-green-50 to-blue-50 border-b border-gray-100">
           <div class="flex justify-between items-center">
             <h3 class="font-medium text-gray-800">Invoice Details</h3>
@@ -37,7 +37,7 @@
         </div>
         
         <!-- Updated scrollable area with max height -->
-        <div class="flex-1 overflow-y-auto custom-scrollbar p-6" style="max-height: 700px;">
+        <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
           <div class="space-y-8"> <!-- Added space-y-8 for better spacing between sections -->
             <BrandingSection
               v-model:invoice="invoice"
@@ -215,26 +215,6 @@
             
             <!-- Navigation Buttons -->
             <div class="flex justify-between">
-              <button 
-                v-if="currentStepIndex > 0"
-                @click="navigateToPrevious" 
-                class="group flex items-center space-x-2 px-4 py-2 bg-white text-gray-600 hover:text-gray-800 transition-colors duration-200 rounded-lg border border-gray-100 hover:border-gray-200"
-              >
-                <svg class="w-5 h-5 transform group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
-                <span>Previous</span>
-              </button>
-              <button 
-                v-if="currentStepIndex < formSections.length - 1"
-                @click="navigateToNext"
-                class="group flex items-center space-x-2 px-4 py-2 bg-white text-gray-600 hover:text-gray-800 transition-colors duration-200 rounded-lg border border-gray-100 hover:border-gray-200"
-              >
-                <span>Next</span>
-                <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
               <button 
                 @click="sendInvoice"
                 class="flex items-center px-4 py-2 text-sm bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-all duration-200 rounded-lg"
