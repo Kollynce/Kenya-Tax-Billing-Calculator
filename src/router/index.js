@@ -5,7 +5,6 @@ import { auth } from '../firebase';
 const HomePage = () => import('../views/Home.vue');
 const TaxCalculator = () => import('../views/TaxCalculator.vue');
 const BillingGenerator = () => import('../views/BillingGenerator.vue');
-const BillingPlanner = () => import('../views/BillingPlanner.vue');
 const Proposal = () => import('../views/Proposal.vue');
 const Examples = () => import('../views/Examples.vue');
 const Auth = () => import('../views/Auth.vue');
@@ -14,6 +13,7 @@ const Profile = () => import('../views/Profile.vue');
 const InvoiceCreate = () => import('../views/InvoiceCreate.vue');
 const TaxGuide = () => import('../views/TaxGuide.vue');
 const BlogPage = () => import('../views/Blog.vue');
+const ProjectPitch = () => import('../views/ProjectPitch.vue');
 
 const routes = [
   {
@@ -34,7 +34,7 @@ const routes = [
   {
     path: '/billing-planner',
     name: 'BillingPlanner',
-    component: BillingPlanner
+    component: ProjectPitch
   },
   {
     path: '/proposal',
@@ -84,6 +84,11 @@ const routes = [
     path: '/blog',
     name: 'Blog',
     component: BlogPage
+  },
+  {
+    path: '/project-pitch',
+    name: 'ProjectPitch',
+    component: ProjectPitch
   }
 ];
 
