@@ -1,53 +1,29 @@
 <template>
-  <div class="flex flex-col lg:flex-row gap-6 animate-fade-in">
+  <!-- Add loading overlay -->
+<LoadingSpinner 
+  v-if="isLoading"
+  size="lg"
+  color="green-600"
+  :label="loadingMessage"
+  :overlay="true"
+/>
+
+<!-- Add progress indicator -->
+<ProgressIndicator 
+  :steps="formSteps"
+  :currentStep="currentStep"
+  class="mb-6"
+/>
+
+<!-- Form content -->
+<div class="flex flex-col lg:flex-row gap-6 animate-fade-in">
     <!-- Main Form Section -->
     <div class="w-full lg:w-2/3">
       <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 space-y-6">
-        <!-- Header with back button -->
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-2xl font-bold text-gray-900">Create Your Project</h2>
-          <button 
-            @click="cancelProject" 
-            class="text-gray-500 hover:text-gray-700 flex items-center"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-            </svg>
-            Back to Example
-          </button>
-        </div>
-        
-        <!-- Progress Steps -->
-        <div class="mb-8">
-          <div class="flex justify-between">
-            <div v-for="(step, index) in steps" :key="index" class="flex-1">
-              <div class="relative">
-                <div class="flex items-center justify-center">
-                  <div :class="[
-                    'w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300',
-                    currentStep >= index ? 'bg-gradient-to-r from-green-600 to-green-500 text-white shadow-lg' : 'bg-gray-100 text-gray-500'
-                  ]">
-                    {{ index + 1 }}
-                  </div>
-                </div>
-                <div class="mt-2 text-center">
-                  <p class="text-sm font-medium" :class="currentStep >= index ? 'text-green-600' : 'text-gray-500'">
-                    {{ step.name }}
-                  </p>
-                </div>
-                <div v-if="index < steps.length - 1" :class="[
-                  'absolute top-5 w-full h-0.5 transition-all duration-300',
-                  currentStep > index ? 'bg-gradient-to-r from-green-600 to-green-500' : 'bg-gray-200'
-                ]"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Step Content -->
-        <div class="bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border border-gray-100 shadow-md hover:shadow-lg transition-all duration-300">
+        <!-- Form Content -->
+        <div class="mt-8">
           <!-- Step 1: Project Setup -->
-          <div v-if="currentStep === 0" class="space-y-6">
+          <div v-if="currentStep === 0">
             <h3 class="text-lg font-medium text-gray-900">Project Setup</h3>
           
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -78,6 +54,7 @@
                   :key="service.name"
                   @click="selectService(service)"
                   :class="[
+
                     'p-4 border rounded-md cursor-pointer transition-colors',
                     project.serviceName === service.name ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'
                   ]"
@@ -100,113 +77,14 @@
           </div>
 
           <!-- Step 2: Pricing Model -->
-          <div v-if="currentStep === 1" class="space-y-6">
-            <h3 class="text-lg font-medium text-gray-900">Pricing Model</h3>
-          
-            <div v-if="selectedService">
-              <p class="text-gray-600 mb-4">Select a pricing model for "{{ selectedService.name }}"</p>
-              
-              <!-- Pricing Options -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div 
-                  v-for="option in selectedService.pricingOptions" 
-                  :key="option.label"
-                  @click="selectPricingOption(option)"
-                  :class="[
-                    'p-4 border rounded-md cursor-pointer transition-colors',
-                    project.pricingModel === option.type && project.pricingLabel === option.label ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'
-                  ]"
-                >
-                  <h4 class="font-medium text-gray-900">{{ option.label }}</h4>
-                  <p v-if="option.type === 'fixed'" class="text-sm text-gray-600">Fixed price: {{ formatCurrency(option.defaultRate) }}</p>
-                  <p v-if="option.type === 'hourly'" class="text-sm text-gray-600">{{ formatCurrency(option.defaultRate) }} per hour × {{ option.defaultHours }} hours</p>
-                  <p v-if="option.type === 'wordCount'" class="text-sm text-gray-600">{{ formatCurrency(option.defaultRate) }} per 1000 words</p>
-                </div>
-              </div>
-              
-              <!-- Custom Rate Input -->
-              <div v-if="project.pricingModel" class="mb-6">
-                <h4 class="text-md font-medium text-gray-900 mb-3">Customize Your Pricing</h4>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <!-- Fixed Price or Hourly Rate -->
-                  <div v-if="project.pricingModel === 'fixed' || project.pricingModel === 'hourly'">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                      {{ project.pricingModel === 'fixed' ? 'Fixed Price (KES)' : 'Hourly Rate (KES)' }}
-                    </label>
-                    <input 
-                      type="number" 
-                      v-model.number="project.rate" 
-                      class="w-full rounded-md border-gray-300"
-                      min="0"
-                    >
-                  </div>
-                  
-                  <!-- Word Count Rate -->
-                  <div v-if="project.pricingModel === 'wordCount'">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Rate per 1000 words (KES)</label>
-                    <input 
-                      type="number" 
-                      v-model.number="project.rate" 
-                      class="w-full rounded-md border-gray-300"
-                      min="0"
-                    >
-                  </div>
-                  
-                  <!-- Quantity -->
-                  <div v-if="project.pricingModel === 'fixed'">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
-                    <input 
-                      type="number" 
-                      v-model.number="project.quantity" 
-                      class="w-full rounded-md border-gray-300"
-                      min="1"
-                    >
-                  </div>
-                  
-                  <!-- Hours -->
-                  <div v-if="project.pricingModel === 'hourly'">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Estimated Hours</label>
-                    <input 
-                      type="number" 
-                      v-model.number="project.hours" 
-                      class="w-full rounded-md border-gray-300"
-                      min="0"
-                    >
-                  </div>
-                  
-                  <!-- Word Count -->
-                  <div v-if="project.pricingModel === 'wordCount'">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Word Count</label>
-                    <input 
-                      type="number" 
-                      v-model.number="project.wordCount" 
-                      class="w-full rounded-md border-gray-300"
-                      min="0"
-                    >
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="flex justify-between">
-              <button 
-                @click="currentStep = 0"
-                class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
-              >
-                Back
-              </button>
-              <button 
-                @click="nextStep"
-                class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-500 transition-colors"
-                :disabled="!project.pricingModel"
-              >
-                Continue
-              </button>
-            </div>
+          <div v-if="currentStep === 1">
+            <TieredPricing
+              :profession="project.profession"
+              @select="handlePackageSelection"
+            />
           </div>
 
-          <!-- Step 3: Expenses -->
+          <!-- Step 3: Additional Services -->
           <div v-if="currentStep === 2" class="space-y-6">
             <h3 class="text-lg font-medium text-gray-900">Project Expenses</h3>
             <p class="text-gray-600 mb-4">Add any additional expenses associated with this project</p>
@@ -247,6 +125,7 @@
                 </button>
               </div>
               
+
               <div class="space-y-4">
                 <div 
                   v-for="(expense, index) in project.expenses" 
@@ -283,204 +162,82 @@
                 </div>
               </div>
             </div>
-            
-            <!-- Tax Settings -->
-            <div class="p-4 border rounded-md border-gray-200 bg-gray-50 mb-6">
-              <h4 class="text-md font-medium text-gray-900 mb-3">Tax Settings</h4>
-              <div class="space-y-3">
-                <div class="flex items-center">
-                  <input 
-                    type="checkbox" 
-                    id="vatRegistered"
-                    v-model="project.isVATRegistered"
-                    class="mr-3 rounded border-gray-300"
-                  >
-                  <label for="vatRegistered" class="text-sm text-gray-700">I am VAT registered (16% VAT will be added)</label>
-                </div>
-                
-                <div v-if="isDigitalProfession" class="flex items-center">
-                  <input 
-                    type="checkbox" 
-                    id="digitalServiceTax"
-                    v-model="project.includeDigitalServiceTax"
-                    class="mr-3 rounded border-gray-300"
-                  >
-                  <label for="digitalServiceTax" class="text-sm text-gray-700">Include Digital Service Tax (1.5%)</label>
-                </div>
-              </div>
-            </div>
-            
-            <div class="flex justify-between">
-              <button 
-                @click="currentStep = 1"
-                class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
-              >
-                Back
-              </button>
-              <button 
-                @click="nextStep"
-                class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-500 transition-colors"
-              >
-                Continue
-              </button>
-            </div>
           </div>
 
           <!-- Step 4: Client Information -->
-          <div v-if="currentStep === 3" class="space-y-6">
-            <h3 class="text-lg font-medium text-gray-900">Client Information</h3>
-            <p class="text-gray-600 mb-4">Add details about your client for the proposal</p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Client Name</label>
-                <input type="text" v-model="project.client.name" class="w-full rounded-md border-gray-300" placeholder="Company or individual name">
-              </div>
+          <div v-if="currentStep === 3">
+            <div class="space-y-6">
+              <h3 class="text-lg font-medium text-gray-900">Client Information</h3>
+              <p class="text-gray-600 mb-4">Add details about your client for the proposal</p>
               
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Client Email</label>
-                <input type="email" v-model="project.client.email" class="w-full rounded-md border-gray-300" placeholder="client@example.com">
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Client Phone</label>
-                <input type="text" v-model="project.client.phone" class="w-full rounded-md border-gray-300" placeholder="e.g. +254 700 000 000">
-              </div>
-              
-              <div class="col-span-1 md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Client Address</label>
-                <textarea v-model="project.client.address" rows="2" class="w-full rounded-md border-gray-300" placeholder="Physical address"></textarea>
-              </div>
-            </div>
-            
-            <div class="p-4 border rounded-md border-gray-200 bg-gray-50 mb-6">
-              <h4 class="text-md font-medium text-gray-900 mb-3">Your Business Details</h4>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Your Name/Business Name</label>
-                  <input type="text" v-model="project.from.name" class="w-full rounded-md border-gray-300" placeholder="Your business name">
-                </div>
-                
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                  <input type="email" v-model="project.from.email" class="w-full rounded-md border-gray-300" placeholder="your@email.com">
-                </div>
-                
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-                  <input type="text" v-model="project.from.phone" class="w-full rounded-md border-gray-300" placeholder="e.g. +254 700 000 000">
-                </div>
-                
-                <div class="col-span-1 md:col-span-2">
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Business Address</label>
-                  <textarea v-model="project.from.address" rows="2" class="w-full rounded-md border-gray-300" placeholder="Your address"></textarea>
-                </div>
-              </div>
-            </div>
-            
-            <div class="flex justify-between">
-              <button 
-                @click="currentStep = 2"
-                class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
-              >
-                Back
-              </button>
-              <button 
-                @click="nextStep"
-                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              >
-                Continue
-              </button>
-            </div>
-          </div>
 
-          <!-- Step 5: Summary and Generation -->
-          <div v-if="currentStep === 4" class="space-y-6">
-            <h3 class="text-lg font-medium text-gray-900">Project Summary</h3>
-            
-            <!-- Project Details Card -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="bg-white rounded-lg border border-gray-200 p-4">
-                <div class="space-y-4">
+              <form @submit.prevent="validateAndProceed" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h4 class="text-sm font-medium text-gray-500">Project</h4>
-                    <p class="text-gray-900">{{ project.title }}</p>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Client Name</label>
+                    <input 
+                      type="text" 
+                      v-model="v$.client.name.$model"
+                      :class="[
+
+                        'w-full rounded-md border-gray-300',
+                        {'border-red-300 focus:border-red-500 focus:ring-red-500': v$.client.name.$error}
+                      ]"
+                      aria-required="true"
+                      aria-invalid="v$.client.name.$error"
+                      @blur="v$.client.name.$touch"
+                    />
+                    <p v-if="v$.client.name.$error" class="mt-1 text-sm text-red-600">
+                      {{ v$.client.name.$errors[0].$message }}
+                    </p>
                   </div>
                   
+
                   <div>
-                    <h4 class="text-sm font-medium text-gray-500">Service</h4>
-                    <p class="text-gray-900">{{ project.serviceName }}: {{ project.serviceDescription }}</p>
-                  </div>
-                  
-                  <div>
-                    <h4 class="text-sm font-medium text-gray-500">Pricing Model</h4>
-                    <p class="text-gray-900">
-                      {{ project.pricingLabel }}
-                      <span v-if="project.pricingModel === 'fixed'"> ({{ formatCurrency(project.rate) }} × {{ project.quantity }})</span>
-                      <span v-if="project.pricingModel === 'hourly'"> ({{ formatCurrency(project.rate) }}/hr × {{ project.hours }} hours)</span>
-                      <span v-if="project.pricingModel === 'wordCount'"> ({{ formatCurrency(project.rate) }}/1000 words × {{ project.wordCount }} words)</span>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Client Email</label>
+                    <input 
+                      type="email" 
+                      v-model="v$.client.email.$model"
+                      :class="[
+
+                        'w-full rounded-md border-gray-300',
+                        {'border-red-300 focus:border-red-500 focus:ring-red-500': v$.client.email.$error}
+                      ]"
+                      aria-required="true"
+                      aria-invalid="v$.client.email.$error"
+                      @blur="v$.client.email.$touch"
+                    />
+                    <p v-if="v$.client.email.$error" class="mt-1 text-sm text-red-600">
+                      {{ v$.client.email.$errors[0].$message }}
                     </p>
                   </div>
                 </div>
-              </div>
-              
-              <div class="bg-white rounded-lg border border-gray-200 p-4">
-                <div class="space-y-4">
-                  <div>
-                    <h4 class="text-sm font-medium text-gray-500">Client</h4>
-                    <p class="text-gray-900">{{ project.client.name || 'Not specified' }}</p>
-                  </div>
-                  
-                  <div>
-                    <h4 class="text-sm font-medium text-gray-500">Tax Settings</h4>
-                    <div>
-                      <p v-if="project.isVATRegistered" class="text-gray-900">VAT Registered (16%)</p>
-                      <p v-else class="text-gray-900">No VAT</p>
-                      <p v-if="project.includeDigitalServiceTax" class="text-gray-900">Digital Service Tax (1.5%)</p>
-                    </div>
-                  </div>
-                  
-                  <div v-if="project.expenses.length > 0">
-                    <h4 class="text-sm font-medium text-gray-500">Expenses</h4>
-                    <ul class="text-gray-900 list-disc list-inside">
-                      <li v-for="expense in project.expenses" :key="expense.name">
-                        {{ expense.name }}: {{ formatCurrency(expense.cost) }}
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            <slot name="taxInsights"></slot>
-            
-            <!-- Document Generation -->
-            <div class="bg-white rounded-lg border border-gray-200 p-6">
-              <h4 class="text-lg font-medium text-gray-900 mb-3">Document Generation</h4>
-              <p class="text-sm text-gray-600 mb-4">Create professional documents for your client</p>
-              
-              <div class="flex flex-wrap gap-4">
-                <button 
-                  @click="generateProposal"
-                  class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-500"
-                >
-                  Generate Proposal
-                </button>
-                
-                <button 
-                  @click="createInvoice"
-                  class="inline-flex items-center px-6 py-3 border border-green-600 text-base font-medium rounded-md text-green-600 hover:bg-green-50"
-                >
-                  Create Invoice
-                </button>
-                
-                <button 
-                  @click="saveProject"
-                  class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 hover:bg-gray-50"
-                >
-                  Save Project
-                </button>
-              </div>
+                <!-- Tax Settings -->
+                <TaxSettings
+                  :base-amount="pricingCalculation.subtotal"
+                  :profession="project.profession"
+                  @update="handleTaxSettingsUpdate"
+                />
+
+                <div class="flex justify-between">
+                  <button 
+                    type="button"
+                    @click="currentStep--"
+                    class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                  >
+                    Back
+                  </button>
+                  <button 
+                    type="submit"
+                    :disabled="loading"
+                    class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-500 transition-colors flex items-center space-x-2"
+                  >
+                    <span>Continue</span>
+                    <LoadingSpinner v-if="loading" class="w-4 h-4" />
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
@@ -525,24 +282,40 @@
       </div>
     </div>
   </div>
+
+  <!-- Add validation error messages -->
+  <div v-if="currentStepErrors.length" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+    <h4 class="text-red-700 font-medium mb-2">Please fix the following errors:</h4>
+    <ul class="list-disc list-inside text-sm text-red-600">
+      <li v-for="error in currentStepErrors" :key="error">{{ error }}</li>
+    </ul>
+  </div>
+
+  <!-- Add aria labels and keyboard navigation -->
+  <div class="space-y-6" role="form">
+    <slot name="formContent"></slot>
+  </div>
 </template>
 
 <script>
-import { ref, computed, reactive, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { auth } from '../firebase';
-import { 
-  PROJECT_PRICING_MODELS, 
-  calculateProjectPricing, 
-  saveProjectPlan,
-  convertProjectToInvoice,
-  saveInvoice
-} from '../services/billingService';
-import { formatCurrency } from '../utils/taxUtils';
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
+import { useProjectStore } from '@/store/projectStore'
+import LoadingSpinner from '@/components/LoadingSpinner.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import TieredPricing from '@/components/planner/TieredPricing.vue'
+import { useVuelidate } from '@vuelidate/core'
+import { required, email, helpers } from '@vuelidate/validators'
+import { formatCurrency } from '@/utils/taxUtils'
+import { useKeyboardNav } from '@/composables/useKeyboardNav'
 
 export default {
   name: 'ProjectCreationForm',
-  
+  components: {
+    LoadingSpinner,
+    ProgressIndicator,
+    TieredPricing
+  },
   emits: ['update:currentStep', 'cancel'],
 
   props: {
@@ -553,16 +326,111 @@ export default {
   },
 
   setup(props, { emit }) {
-    const router = useRouter();
-    const currentStep = ref(props.initialStep);
-    const steps = [
-      { name: 'Project Setup' },
-      { name: 'Pricing Model' },
-      { name: 'Expenses' },
-      { name: 'Client Info' },
-      { name: 'Summary' }
-    ];
+    const router = useRouter()
+    const projectStore = useProjectStore()
+    const isLoading = ref(false)
+    const loadingMessage = ref('')
+    const currentStep = ref(props.initialStep)
     
+    // Add missing reactive variables
+    const serviceTemplates = computed(() => {
+      const templates = {
+        designer: [
+          {
+            name: 'Logo Design',
+            description: 'Professional logo and brand identity design',
+            commonExpenses: [
+              { name: 'Stock Assets', defaultCost: 2000, included: false },
+              { name: 'Font Licensing', defaultCost: 3000, included: false }
+            ]
+          },
+          {
+            name: 'Web Design',
+            description: 'Custom website design and UI/UX',
+            commonExpenses: [
+              { name: 'UI Kit', defaultCost: 5000, included: false },
+              { name: 'Stock Photos', defaultCost: 3000, included: false }
+            ]
+          }
+        ],
+        writer: [
+          {
+            name: 'Content Writing',
+            description: 'SEO-optimized content for your website',
+            commonExpenses: [
+              { name: 'Research Tools', defaultCost: 2000, included: false },
+              { name: 'Editing Software', defaultCost: 1500, included: false }
+            ]
+          }
+        ]
+      }
+      return templates[project.profession] || []
+    })
+
+    const selectedService = computed(() => {
+      return serviceTemplates.value.find(service => service.name === project.serviceName)
+    })
+
+    const pricingCalculation = computed(() => {
+      let subtotal = project.rate * (project.quantity || 1)
+      const expenses = project.expenses.reduce((sum, expense) => sum + (expense.cost || 0), 0)
+      
+      return {
+        subtotal,
+        expenses,
+        total: subtotal + expenses
+      }
+    })
+
+    // Form steps with validation
+    const formSteps = reactive([
+      {
+        name: 'Project Setup',
+        description: 'Basic project information',
+        complete: false,
+        validate: () => {
+          const errors = []
+          if (!project.profession) errors.push('Please select a profession')
+          if (!project.title) errors.push('Project title is required')
+          if (!project.serviceName) errors.push('Please select a service type')
+          return errors
+        }
+      },
+      {
+        name: 'Pricing Model',
+        description: 'Set your pricing structure',
+        complete: false,
+        validate: () => {
+          const errors = []
+          if (!project.pricingModel) errors.push('Please select a pricing model')
+          if (project.rate <= 0) errors.push('Rate must be greater than 0')
+          return errors
+        }
+      },
+      {
+        name: 'Expenses',
+        description: 'Add project expenses',
+        complete: false,
+        validate: () => []
+      },
+      {
+        name: 'Client Details',
+        description: 'Client information',
+        complete: false,
+        validate: () => {
+          const errors = []
+          if (!project.client.name) errors.push('Client name is required')
+          if (!project.client.email) errors.push('Client email is required')
+          return errors
+        }
+      }
+    ])
+
+    const currentStepErrors = computed(() => {
+      if (!formSteps[currentStep.value]) return []
+      return formSteps[currentStep.value].validate()
+    })
+
     // Project data
     const project = reactive({
       profession: '',
@@ -593,214 +461,204 @@ export default {
       notes: '',
       timeline: '',
       terms: ''
-    });
-    
-    // User authentication
-    const userId = ref(null);
-    onMounted(() => {
-      auth.onAuthStateChanged((user) => {
-        userId.value = user ? user.uid : null;
-        if (user) {
-          // Pre-fill business details if available
-          project.from.name = user.displayName || '';
-          project.from.email = user.email || '';
-        }
-      });
-    });
-    
-    // Computed properties
-    const serviceTemplates = computed(() => {
-      return PROJECT_PRICING_MODELS[project.profession] || [];
-    });
-    
-    const selectedService = computed(() => {
-      return serviceTemplates.value.find(service => service.name === project.serviceName);
-    });
-    
-    const isDigitalProfession = computed(() => {
-      return ['designer', 'writer'].includes(project.profession);
-    });
-    
-    const pricingCalculation = computed(() => {
-      return calculateProjectPricing({
-        pricingModel: project.pricingModel,
-        quantity: project.quantity,
-        rate: project.rate,
-        hours: project.hours,
-        wordCount: project.wordCount,
-        expenses: project.expenses,
-        isVATRegistered: project.isVATRegistered,
-        includeDigitalServiceTax: project.includeDigitalServiceTax
-      });
-    });
-    
+    })
+
+    // Save form state periodically
+    const autoSave = () => {
+      projectStore.saveFormDraft(project)
+    }
+    const autoSaveInterval = setInterval(autoSave, 30000)
+
     // Methods
     const handleProfessionChange = () => {
-      // Reset service selection when profession changes
-      project.serviceName = '';
-      project.serviceDescription = '';
-      project.pricingModel = '';
-      project.pricingLabel = '';
-      project.expenses = [];
-    };
+      project.serviceName = ''
+      project.serviceDescription = ''
+      project.pricingModel = ''
+      project.pricingLabel = ''
+      project.expenses = []
+    }
     
     const selectService = (service) => {
-      project.serviceName = service.name;
-      project.serviceDescription = service.description;
-    };
+      project.serviceName = service.name
+      project.serviceDescription = service.description
+    }
     
-    const selectPricingOption = (option) => {
-      project.pricingModel = option.type;
-      project.pricingLabel = option.label;
-      project.rate = option.defaultRate;
-      
-      if (option.type === 'hourly' && option.defaultHours) {
-        project.hours = option.defaultHours;
-      }
-      
-      if (option.type === 'wordCount' && option.defaultCount) {
-        project.wordCount = option.defaultCount;
-      }
-    };
+    const handlePackageSelection = (packageData) => {
+      project.pricingModel = 'tiered'
+      project.selectedPackage = packageData.package
+      project.rate = packageData.total
+      project.pricingLabel = `${packageData.package.name} Package`
+      nextStep()
+    }
+
+    const handleTaxSettingsUpdate = (settings) => {
+      Object.assign(project, {
+        isVATRegistered: settings.isVatRegistered,
+        vatNumber: settings.vatNumber,
+        includeDigitalServiceTax: settings.hasDigitalServiceTax,
+        includeWithholdingTax: settings.hasWithholdingTax,
+        taxSummary: settings.summary
+      })
+    }
     
     const toggleExpense = (expense) => {
       if (expense.included) {
-        // Add to expenses
         project.expenses.push({
           name: expense.name,
           cost: expense.defaultCost
-        });
+        })
       } else {
-        // Remove from expenses
-        const index = project.expenses.findIndex(e => e.name === expense.name);
+        const index = project.expenses.findIndex(e => e.name === expense.name)
         if (index !== -1) {
-          project.expenses.splice(index, 1);
+          project.expenses.splice(index, 1)
         }
       }
-    };
+    }
     
     const addCustomExpense = () => {
       project.expenses.push({
         name: '',
         cost: 0
-      });
-    };
+      })
+    }
     
     const removeExpense = (index) => {
-      project.expenses.splice(index, 1);
-    };
-    
-    const nextStep = () => {
-      if (currentStep.value < steps.length - 1) {
-        currentStep.value++;
-        emit('update:currentStep', currentStep.value);
+      project.expenses.splice(index, 1)
+    }
+
+    // Update nextStep to use Vuelidate
+    const nextStep = async () => {
+      const isValid = await v$.value.$validate()
+      if (!isValid) return
+
+      formSteps[currentStep.value].complete = true
+      if (currentStep.value < formSteps.length - 1) {
+        currentStep.value++
+        emit('update:currentStep', currentStep.value)
+        v$.value.$reset()
+      } else {
+        try {
+          isLoading.value = true
+          loadingMessage.value = 'Generating proposal...'
+          await projectStore.saveProject(project)
+          router.push({ name: 'ProjectPitch', params: { id: project.id }})
+        } catch (error) {
+          console.error('Error saving project:', error)
+        } finally {
+          isLoading.value = false
+        }
       }
-    };
-    
+    }
+
     const cancelProject = () => {
-      emit('cancel');
-    };
-    
-    const generateProposal = () => {
-      // Navigate to proposal view with project data
-      router.push({
-        name: 'Proposal',
-        query: { project: JSON.stringify(project) }
-      });
-    };
-    
-    const createInvoice = async () => {
-      try {
-        if (!userId.value) {
-          alert('Please log in to create an invoice');
-          return;
-        }
-        
-        // Convert project to invoice format
-        const invoice = convertProjectToInvoice(project);
-        
-        // Save invoice to Firestore
-        const invoiceId = await saveInvoice(userId.value, invoice);
-        
-        // Navigate to invoice view
-        router.push({
-          path: `/invoice/${invoiceId}`
-        });
-      } catch (error) {
-        console.error('Error creating invoice:', error);
-        alert('Failed to create invoice. Please try again.');
+      emit('cancel')
+    }
+
+    // Restore form data if available
+    onMounted(() => {
+      const savedData = projectStore.getFormDraft()
+      if (savedData) {
+        Object.assign(project, savedData)
       }
-    };
+    })
+
+    onBeforeUnmount(() => {
+      clearInterval(autoSaveInterval)
+    })
     
-    const saveProject = async () => {
-      try {
-        if (!userId.value) {
-          alert('Please log in to save your project');
-          return;
+    // Validation rules
+    const rules = {
+      profession: { required: helpers.withMessage('Please select your profession', required) },
+      title: { required: helpers.withMessage('Project title is required', required) },
+      serviceName: { required: helpers.withMessage('Please select a service type', required) },
+      client: {
+        name: { required: helpers.withMessage('Client name is required', required) },
+        email: { 
+          required: helpers.withMessage('Client email is required', required),
+          email: helpers.withMessage('Please enter a valid email address', email)
         }
-        
-        // Save project to Firestore
-        await saveProjectPlan(userId.value, project);
-        
-        alert('Project saved successfully!');
-      } catch (error) {
-        console.error('Error saving project:', error);
-        alert('Failed to save project. Please try again.');
       }
-    };
+    }
+
+    const v$ = useVuelidate(rules, project)
+
+    // Keyboard navigation
+    const isFormEnabled = computed(() => !isLoading.value)
     
+    useKeyboardNav({
+      isEnabled: isFormEnabled,
+      onNext: () => {
+        if (currentStepErrors.value.length === 0) {
+          nextStep()
+        }
+      },
+      onPrevious: () => {
+        if (currentStep.value > 0) {
+          currentStep.value--
+          emit('update:currentStep', currentStep.value)
+        }
+      },
+      onEscape: cancelProject
+    })
+
     return {
+      isLoading,
+      loadingMessage,
+      formSteps,
       currentStep,
-      steps,
+      currentStepErrors,
       project,
-      serviceTemplates,
-      selectedService,
-      isDigitalProfession,
-      pricingCalculation,
       handleProfessionChange,
       selectService,
-      selectPricingOption,
+      handlePackageSelection,
+      handleTaxSettingsUpdate,
       toggleExpense,
       addCustomExpense,
       removeExpense,
       nextStep,
-      generateProposal,
-      createInvoice,
-      saveProject,
+      cancelProject,
       formatCurrency,
-      cancelProject
-    };
+      v$,
+      serviceTemplates,
+      selectedService,
+      pricingCalculation,
+    }
   }
-};
+}
 </script>
 
 <style scoped>
-.card-hover {
-  transition: all 0.3s ease-in-out;
+/* Add responsive styles */
+@media (max-width: 768px) {
+  .lg\:flex-row {
+    flex-direction: column;
+  }
+  .lg\:w-2\/3 {
+    width: 100%;
+  }
+  .lg\:w-1\/3 {
+    width: 100%;
+  }
 }
 
-.card-hover:hover {
-  transform: translateY(-2px);
+/* Improve accessibility */
+[role="button"]:focus {
+  @apply outline-none ring-2 ring-offset-2 ring-green-500;
 }
 
+/* Add smooth transitions */
 .animate-fade-in {
   animation: fadeIn 0.3s ease-in-out;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.text-primary {
-  color: #16A34A;  /* text-green-600 equivalent */
-}
-
-.bg-primary {
-  background-color: #16A34A;  /* bg-green-600 equivalent */
-}
-
-.bg-primary-dark {
-  background-color: #15803D;  /* bg-green-700 equivalent */
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

@@ -334,6 +334,7 @@
         </div>
       </div>
     </footer>
+    <Toast />
   </div>
 </template>
 
@@ -343,12 +344,14 @@ import { auth } from './firebase';
 import { useRouter } from 'vue-router';
 import LoadingScreen from './components/LoadingScreen.vue';
 import PageTransition from './components/PageTransition.vue';
+import Toast from '@/components/Toast.vue'
 
 export default {
   name: 'App',
   components: {
     LoadingScreen,
-    PageTransition
+    PageTransition,
+    Toast
   },
   setup() {
     const isAuthenticated = ref(false);
